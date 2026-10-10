@@ -170,7 +170,7 @@ MonoBehaviour:
   isSimPaused: 0
   updateInterval: 0.025
   gravity: 0.2
-  chunkSize: 8
+  chunkSize: 6
   chunkGenerationMode: 1
   chunkUpdateMode: 0
   enableDrawing: 1
@@ -184,6 +184,7 @@ MonoBehaviour:
   renderChunkBorders: 0
   showActiveChunks: 1
   renderElements: 0
+  frameCount: 0
 --- !u!4 &322835529
 Transform:
   m_ObjectHideFlags: 0

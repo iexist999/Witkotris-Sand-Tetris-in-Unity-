@@ -124,7 +124,7 @@ public class SimulationRenderer : MonoBehaviour
         foreach (var chunkPair in simulation.chunks)
         {
             Vector2Int chunkPos = chunkPair.Key;
-            SandSimulation.Chunk chunk = chunkPair.Value;
+            Chunk chunk = chunkPair.Value;
 
             // Calculate base texture position for this chunk
             int baseX = (chunkPos.x - simulationBounds.x) * simulation.chunkSize;
