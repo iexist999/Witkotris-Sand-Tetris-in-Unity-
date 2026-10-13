@@ -1,86 +1,86 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using static SandSimulation;
 
-public abstract class Element
+namespace SandBXDSIM
 {
-    public Vector2Int localPosition;
-    public Vector2Int chunkPosition;
-    public bool isResting;
-    public bool isSleeping;
-    public float verticalVelocity;
-    public float horizontalVelocity;
-    public bool hasContactBelow;
-    public bool hasContactAbove;
-    // virtual properties
-    public virtual float maxVelocity => 5f;  // Maximum fall speed
-    public virtual float velocityAbsorption => 0.5f; // How much velocity is retained on impact (0-1)
-    public virtual float maxHorizontalVelocity => 3f; // Maximum horizontal speed
-    public virtual float horizontalDrag => 0.2f; // Base drag in air
-    public virtual float friction => 0.4f; // Additional slowdown when touching surfaces
-
-    //color data
-    public virtual bool useCustomColorData => false;
-    public virtual Color[] colorData => new Color[1] { new Color(1, 1, 1) };
-    protected Color localColor = Color.white;
-    public Color GetLocalColor() => localColor;
-
-    //other
-    public int lastUpdatedFrame = -1;
-    public virtual bool NeedsUpdate => !isResting;
-
-
-    public Element(Vector2Int localPos, Vector2Int chunkPos)
+    struct Element
     {
-        localPosition = localPos;
-        chunkPosition = chunkPos;
-        isResting = false;
-        verticalVelocity = 0f;
-        horizontalVelocity = 0f;
-        hasContactBelow = false;
-        hasContactAbove = false;
-    }
+        // === Identity
+        public string name;
+        public ElementType type;
 
-    public Vector2Int GetGlobalPosition()
-    {
-        return chunkPosition * SandSimulation.Instance.chunkSize + localPosition;
-    }
+        // === Physical Properties
+        public float density;
+        public float friction;
 
-    public void ApplyFriction()
-    {
-        if (hasContactBelow || hasContactAbove)
+        // === Chemical Properties
+        public float temperature;
+        public float thermalConductivity;
+
+        // === Appearance Settings
+        public bool customColor;
+        public byte shadeCount;
+        public Color32 baseColor;
+        public Color32[] customColors;
+
+        // === Liquid Specific Properties
+        public float viscosity;
+        public float vorticity;
+        public float cohesion;
+
+        // === Other Properties
+        public float gravityInfluence;
+
+        // === Behavior
+        public ElementBehavior behavior;
+
+        public Element(/*Identity*/string name, ElementType type,
+            /*Physical Properties*/byte density, float friction,
+            /*Chemical Properties*/float temperature, float thermalConductivity,
+            /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
+            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion,
+            /*Other*/float gravityInfluence)
         {
-            // Apply additional slowdown when touching surfaces
-            horizontalVelocity *= (1f - friction);
-        }
-    }
+            // Identity
+            this.name = name;
+            this.type = type;
 
-    public bool HasSupport(Chunk currentChunk)
-    {
-        Vector2Int below = new Vector2Int(localPosition.x, localPosition.y - 1);
-        Vector2Int targetChunk = chunkPosition;
+            // Physical Properties
+            this.density = density;
+            this.friction = friction;
 
-        if (below.y < 0)
-        {
-            below.y = currentChunk.chunkSize - 1;
-            targetChunk.y -= 1;
-        }
+            // Chemical Properties
+            this.temperature = temperature;
+            this.thermalConductivity = thermalConductivity;
 
-        if (SandSimulation.Instance.chunks.TryGetValue(targetChunk, out Chunk targetChunkObj))
-        {
-            Vector3Int tilePosition = new Vector3Int(
-                below.x / currentChunk.chunkSize + targetChunk.x,
-                below.y / currentChunk.chunkSize + targetChunk.y,
-                0);
+            // Appearance
+            this.customColor = customColor;
+            this.shadeCount = (byte)Mathf.Max(1, shadeCount);
+            this.baseColor = baseColor;
+            this.customColors = customColors;
 
-            return SandSimulation.Instance.collisionTilemap.HasTile(tilePosition) ||
-                   targetChunkObj.elements[below.x, below.y] != null;
+            // Liquid Specific Properties
+            this.viscosity = viscosity;
+            this.vorticity = vorticity;
+            this.cohesion = cohesion;
+
+            // Other Properties
+            this.gravityInfluence = gravityInfluence;
+
+            // Behavior
+            this.behavior = BehaviorFor(type);
         }
 
-        return false;
+        static ElementBehavior BehaviorFor(ElementType type)
+        {
+            switch (type)
+            {
+                case ElementType.Atmosphere: return ElementBehavior.Atmosphere;
+                case ElementType.Solid: return ElementBehavior.Solid;
+                case ElementType.Powder: return ElementBehavior.Powder;
+                case ElementType.Liquid: return ElementBehavior.Liquid;
+                case ElementType.Gas: return ElementBehavior.Gas;
+                default: return ElementBehavior.Custom; // Plasma etc.
+            }
+        }
     }
-
-    // Abstract method that must be implemented by derived classes
-    public abstract void Simulate(Chunk currentChunk);
 }
