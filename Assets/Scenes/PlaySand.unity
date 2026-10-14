@@ -169,11 +169,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23911b30bf1b1c54ab36bcf8503eee08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 64
-  height: 112
-  stepsPerSecond: 60
+  worldSettings: {fileID: 11400000, guid: 1c0ddf5004386da45bb3b14cb2bf5c66, type: 2}
   paused: 0
-  defaultMedium: air
 --- !u!212 &322835531
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -317,7 +314,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 3.7
+  orthographic size: 6.55
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -342,7 +339,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2, y: 3.5, z: -10}
+  m_LocalPosition: {x: 2.97, y: 6, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

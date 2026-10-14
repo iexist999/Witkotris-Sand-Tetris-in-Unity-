@@ -16,25 +16,17 @@ namespace SandBXDSIM
     {
         public static Simulation Instance { get; private set; }
 
-        [Header("Grid")]
-        public int width = 30;
-        public int height = 100;
-
         [Header("Simulation")]
-        public float stepsPerSecond = 60f;
+        public WorldSettings worldSettings;
         public bool paused;
 
-        [Header("Medium")]
-        [Tooltip("Element that fills empty space: any element of type Atmosphere (e.g. Air, Vacuum). Never stepped.")]
-        public string defaultMedium = "air";
-
-        /// <summary>Raw grid, row-major, y = 0 is the bottom row. Treat as read-only outside this class.</summary>
+        /// raw grid
         public Cell[] Cells => cells;
 
-        /// <summary>Increments whenever the grid changes. Views compare this to know when to redraw.</summary>
+        /// increments whenever the grid changes
         public int Version { get; private set; }
 
-        /// <summary>Element id that fills empty space. Resolved from <see cref="defaultMedium"/> in Awake.</summary>
+        /// simulation world medium
         public ushort Medium { get; private set; }
 
         Cell[] cells;
@@ -60,7 +52,7 @@ namespace SandBXDSIM
             BuildBehaviorTable();
             ResolveMedium();
 
-            cells = new Cell[width * height];
+            cells = new Cell[worldSettings.GridWidth * worldSettings.GridHeight];
             for (int i = 0; i < cells.Length; i++) cells[i] = MakeCell(Medium);
         }
 
@@ -79,7 +71,7 @@ namespace SandBXDSIM
 
         void ResolveMedium()
         {
-            if (ElementDatabase.TryFind(defaultMedium, out ushort id) && behaviors[id] == ElementBehavior.Atmosphere)
+            if (ElementDatabase.TryFind(worldSettings.defaultMedium, out ushort id) && behaviors[id] == ElementBehavior.Atmosphere)
             {
                 Medium = id;
                 return;
@@ -90,7 +82,7 @@ namespace SandBXDSIM
             {
                 if (behaviors[i] != ElementBehavior.Atmosphere) continue;
 
-                Debug.LogWarning($"Simulation: '{defaultMedium}' is not an Atmosphere-type element, using '{ElementDatabase.Get(i).name}'.", this);
+                Debug.LogWarning($"Simulation: '{worldSettings.defaultMedium}' is not an Atmosphere-type element, using '{ElementDatabase.Get(i).name}'.", this);
                 Medium = i;
                 return;
             }
@@ -107,20 +99,20 @@ namespace SandBXDSIM
         // ---------------------------------------------------------------
         // PUBLIC API
         // ---------------------------------------------------------------
-        public bool InBounds(int x, int y) => (uint)x < (uint)width && (uint)y < (uint)height;
+        public bool InBounds(int x, int y) => (uint)x < (uint)worldSettings.GridWidth && (uint)y < (uint)worldSettings.GridHeight;
 
-        public Cell GetCell(int x, int y) => cells[y * width + x];
+        public Cell GetCell(int x, int y) => cells[y * worldSettings.GridWidth + x];
 
         public void SetCell(int x, int y, ushort element)
         {
             if (!InBounds(x, y)) return;
 
-            cells[y * width + x] = MakeCell(element); // velocity starts at zero
+            cells[y * worldSettings.GridWidth + x] = MakeCell(element); // velocity starts at zero
             Version++;
         }
 
         /// <summary>True if the cell holds an Atmosphere-type element (Air, Vacuum, ...), i.e. it counts as empty space.</summary>
-        public bool IsAtmosphere(int x, int y) => behaviors[cells[y * width + x].element] == ElementBehavior.Atmosphere;
+        public bool IsAtmosphere(int x, int y) => behaviors[cells[y * worldSettings.GridWidth + x].element] == ElementBehavior.Atmosphere;
 
         Cell MakeCell(ushort element) =>
             new Cell { element = element, shade = (byte)(Rand() % (uint)ElementDatabase.Get(element).shadeCount) };
@@ -132,7 +124,7 @@ namespace SandBXDSIM
         {
             if (paused) return;
 
-            float dt = 1f / stepsPerSecond;
+            float dt = 1f / worldSettings.stepsPerSecond;
             accumulator += Time.deltaTime;
 
             int steps = 0;
@@ -154,12 +146,12 @@ namespace SandBXDSIM
             leftToRight = !leftToRight; // alternate scan direction to avoid drift bias
 
             // bottom row first (y = 0), so falling cells never get processed twice
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < worldSettings.GridHeight; y++)
             {
-                int row = y * width;
-                for (int i = 0; i < width; i++)
+                int row = y * worldSettings.GridWidth;
+                for (int i = 0; i < worldSettings.GridWidth; i++)
                 {
-                    int x = leftToRight ? i : width - 1 - i;
+                    int x = leftToRight ? i : worldSettings.GridWidth - 1 - i;
                     int idx = row + x;
 
                     ElementBehavior behavior = behaviors[cells[idx].element];
@@ -299,7 +291,7 @@ namespace SandBXDSIM
         /// <summary>Swaps the cell into (x, y) and returns its new index. The displaced cell ends up at the old spot.</summary>
         int MoveTo(int from, int x, int y)
         {
-            int to = y * width + x;
+            int to = y * worldSettings.GridWidth + x;
             Swap(from, to);
             cells[from].velocity = Vector2.zero; // the displaced cell doesn't inherit our momentum
             return to;
@@ -310,7 +302,7 @@ namespace SandBXDSIM
         bool CanEnter(int from, int tx, int ty)
         {
             if (!InBounds(tx, ty)) return false;
-            return ElementDatabase.Get(cells[ty * width + tx].element).density
+            return ElementDatabase.Get(cells[ty * worldSettings.GridWidth + tx].element).density
                  < ElementDatabase.Get(cells[from].element).density;
         }
 

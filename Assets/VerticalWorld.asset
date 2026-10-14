@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d6118bdf82a64347b6dd059e7b468c5, type: 3}
+  m_Name: VerticalWorld
+  m_EditorClassIdentifier: 
+  chunkSize: 16
+  areaChunksX: 3
+  areaChunksY: 6
+  zoneAreasX: 2
+  zoneAreasY: 2
+  worldZonesX: 1
+  worldZonesY: 1
+  stepsPerSecond: 60
+  defaultMedium: air
+  gravity: {x: 0, y: -9.81}
+  gravityFactor: 0.05
+  maxVelocity: 200

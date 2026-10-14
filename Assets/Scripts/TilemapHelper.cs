@@ -30,9 +30,9 @@ namespace SandBXDSIM
                 return;
             }
 
-            for (int y = 0; y < simulation.height; y++)
+            for (int y = 0; y < simulation.worldSettings.GridHeight; y++)
             {
-                for (int x = 0; x < simulation.width; x++)
+                for (int x = 0; x < simulation.worldSettings.GridWidth; x++)
                 {
                     Vector3 world = view.CellToWorld(x, y);
                     if (solidTilemap.HasTile(solidTilemap.WorldToCell(world)))

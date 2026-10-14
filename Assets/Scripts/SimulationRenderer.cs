@@ -66,7 +66,7 @@ namespace SandBXDSIM
 
         void BuildTexture()
         {
-            int w = simulation.width, h = simulation.height;
+            int w = simulation.worldSettings.GridWidth, h = simulation.worldSettings.GridHeight;
 
             tex = new Texture2D(w, h, TextureFormat.RGBA32, false)
             {
