@@ -11,6 +11,8 @@ namespace SandBXDSIM
         // === Physical Properties
         public float density;
         public float friction;
+        public float velocityTransfer;
+        public float velocityTransferDeviation;
 
         // === Chemical Properties
         public float temperature;
@@ -34,7 +36,7 @@ namespace SandBXDSIM
         public ElementBehavior behavior;
 
         public Element(/*Identity*/string name, ElementType type,
-            /*Physical Properties*/byte density, float friction,
+            /*Physical Properties*/byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
             /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion,
@@ -47,6 +49,8 @@ namespace SandBXDSIM
             // Physical Properties
             this.density = density;
             this.friction = friction;
+            this.velocityTransfer = velocityTransfer;
+            this.velocityTransferDeviation = velocityTransferDeviation;
 
             // Chemical Properties
             this.temperature = temperature;

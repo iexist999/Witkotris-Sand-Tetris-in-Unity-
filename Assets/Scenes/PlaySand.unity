@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 322835530}
   - component: {fileID: 322835532}
   - component: {fileID: 322835533}
+  - component: {fileID: 322835534}
   m_Layer: 0
   m_Name: Simulation
   m_TagString: Untagged
@@ -252,7 +253,33 @@ MonoBehaviour:
   simulation: {fileID: 322835530}
   view: {fileID: 322835532}
   brushElement: sand
-  brushRadius: 1
+  brushRadius: 0
+--- !u!114 &322835534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 322835526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40cc549af66f22d47a4c571d420ee457, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  simulation: {fileID: 322835530}
+  view: {fileID: 322835532}
+  zones:
+    render: 0
+    awakeColor: {r: 1, g: 1, b: 1, a: 1}
+    sleepingColor: {r: 0, g: 0, b: 0.1254902, a: 0.101960786}
+  areas:
+    render: 0
+    awakeColor: {r: 0.1, g: 0.85, b: 1, a: 0.45882353}
+    sleepingColor: {r: 0.1, g: 0.3, b: 0.45, a: 0.1882353}
+  chunks:
+    render: 1
+    awakeColor: {r: 0, g: 1, b: 0.2456789, a: 0.9}
+    sleepingColor: {r: 1, g: 0, b: 0, a: 0.35}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

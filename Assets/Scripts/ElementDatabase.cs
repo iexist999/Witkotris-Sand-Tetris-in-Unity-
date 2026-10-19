@@ -48,7 +48,7 @@ namespace SandBXDSIM
         {
             // - Air
             Register(/*Identity*/new Element("air", ElementType.Atmosphere,
-                /*Physical Properties*/0, 0f,
+                /*Physical Properties*/0, 0f, 0.8f, 0f,
                 /*Chemical Properties*/20f, 0.02f,
                 /*Appearance*/false, 1, new Color32(0, 0, 0, 0), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
@@ -56,7 +56,7 @@ namespace SandBXDSIM
 
             // - Sand
             Register(/*Identity*/new Element("sand", ElementType.Powder,
-                /*Physical Properties*/150, 0.5f,
+                /*Physical Properties*/150, 0.02f, 0.05f, 0.1f,
                 /*Chemical Properties*/20f, 0.10f,
                 /*Appearance*/false, 6, new Color32(222, 192, 110, 255), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
@@ -64,7 +64,7 @@ namespace SandBXDSIM
 
             // - Dirt
             Register(/*Identity*/new Element("dirt", ElementType.Powder,
-                /*Physical Properties*/150, 0.7f,
+                /*Physical Properties*/150, 0.05f, 0.05f, 0.1f,
                 /*Chemical Properties*/20f, 0.10f,
                 /*Appearance*/false, 5, new Color32(110, 75, 45, 255), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
@@ -72,7 +72,7 @@ namespace SandBXDSIM
 
             // - Water
             Register(/*Identity*/new Element("water", ElementType.Liquid,
-                /*Physical Properties*/100, 0.5f,
+                /*Physical Properties*/100, 0.005f, 0.4f, 0.1f,
                 /*Chemical Properties*/20f, 0.50f,
                 /*Appearance*/false, 4, new Color32(0, 0, 255, 255), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
