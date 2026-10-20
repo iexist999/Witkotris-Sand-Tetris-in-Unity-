@@ -54,6 +54,7 @@ namespace SandBXDSIM
         World world;
         WakeSystem waker;
         Stepper stepper;
+        SupportSystem support;
 
         float accumulator;
 
@@ -75,10 +76,11 @@ namespace SandBXDSIM
 
             world = new World(worldSettings, this);
             waker = new WakeSystem(world);
+            support = new SupportSystem(world, waker);
 
             var forces = new Forces(world);
             var mover = new CellMover(world, waker);
-            stepper = new Stepper(world, waker, forces, mover);
+            stepper = new Stepper(world, waker, forces, mover, support);
         }
 
         void OnDestroy()
@@ -114,8 +116,12 @@ namespace SandBXDSIM
         {
             if (!world.InBounds(x, y)) return;
 
-            world.Cells[world.Index(x, y)] = world.MakeCell(element); // velocity starts at zero, asleep
-            waker.WakeAround(x, y);                                   // the new cell may fall; an erased cell lets its neighbours move
+            int idx = world.Index(x, y);
+            bool wasAnchored = world.Cells[idx].anchored;
+
+            world.Cells[idx] = world.MakeCell(element); // velocity starts at zero, asleep
+            waker.WakeAround(x, y);                     // the new cell may fall; an erased cell lets its neighbours move
+            support.OnCellChanged(x, y, wasAnchored);   // anchored or free? did a neighbour just lose its support?
             world.Version++;
         }
 

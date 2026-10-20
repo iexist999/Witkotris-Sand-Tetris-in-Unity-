@@ -79,6 +79,7 @@ namespace SandBXDSIM
             switch (type)
             {
                 case ElementType.Atmosphere: return ElementBehavior.Atmosphere;
+                case ElementType.SuperSolid: return ElementBehavior.SuperSolid;
                 case ElementType.Solid: return ElementBehavior.Solid;
                 case ElementType.Powder: return ElementBehavior.Powder;
                 case ElementType.Liquid: return ElementBehavior.Liquid;

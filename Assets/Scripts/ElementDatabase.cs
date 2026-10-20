@@ -54,6 +54,8 @@ namespace SandBXDSIM
                 /*Liquid Specific Properties*/0f, 0f, 0f,
                 /*Other Properties*/1f));
 
+            // POWDERS ====================================================
+
             // - Sand
             Register(/*Identity*/new Element("sand", ElementType.Powder,
                 /*Physical Properties*/150, 0.02f, 0.05f, 0.1f,
@@ -70,6 +72,8 @@ namespace SandBXDSIM
                 /*Liquid Specific Properties*/0f, 0f, 0f,
                 /*Other Properties*/1f));
 
+            // LIQUIDS ====================================================
+
             // - Water
             Register(/*Identity*/new Element("water", ElementType.Liquid,
                 /*Physical Properties*/100, 0.005f, 0.4f, 0.1f,
@@ -77,6 +81,24 @@ namespace SandBXDSIM
                 /*Appearance*/false, 4, new Color32(0, 0, 255, 255), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
                 /*Other Properties*/1f));
+
+            // SOLIDS ====================================================
+
+            Register(/*Identity*/new Element("stone", ElementType.Solid,
+                /*Physical Properties*/255, 0f, 0f, 0f,
+                /*Chemical Properties*/20f, 0.30f,
+                /*Appearance*/false, 4, new Color32(125, 125, 130, 255), null,
+                /*Liquid Specific Properties*/0f, 0f, 0f,
+                /*Other Properties*/1f));
+
+            // SUPERSOLIDS ================================================
+
+            Register(/*Identity*/new Element("anchor", ElementType.SuperSolid,
+                /*Physical Properties*/255, 0f, 0f, 0f,
+                /*Chemical Properties*/20f, 0.30f,
+                /*Appearance*/false, 1, new Color32(215, 70, 150, 255), null,
+                /*Liquid Specific Properties*/0f, 0f, 0f,
+                /*Other Properties*/0f));
         }
     }
 }

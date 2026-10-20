@@ -29,7 +29,7 @@ namespace SandBXDSIM
 
         /// <summary>ignores elementbehavior that dont need contant updating each step</summary>
         public static bool IsDynamic(ElementBehavior behavior) =>
-            behavior == ElementBehavior.Powder || behavior == ElementBehavior.Liquid;
+            behavior == ElementBehavior.Powder || behavior == ElementBehavior.Liquid || behavior == ElementBehavior.Solid;
 
         /// <summary>
         /// true if no valid moves are possible. checks geometry only, without random rolls.

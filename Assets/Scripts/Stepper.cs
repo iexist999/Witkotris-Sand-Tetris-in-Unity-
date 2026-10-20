@@ -22,10 +22,11 @@ namespace SandBXDSIM
         // one handler per dynamic ElementBehavior
         readonly PowderBehavior powder;
         readonly LiquidBehavior liquid;
+        readonly SolidBehavior solid;
 
         bool leftToRight;
 
-        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover)
+        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover, SupportSystem support)
         {
             this.world = world;
             this.waker = waker;
@@ -36,6 +37,7 @@ namespace SandBXDSIM
 
             powder = new PowderBehavior(world, forces, mover);
             liquid = new LiquidBehavior(world, forces, mover);
+            solid = new SolidBehavior(world, forces, mover, support);
         }
 
         /// <summary>Maps an ElementBehavior to the class that implements it. Keep in sync with CellBehavior.IsDynamic.</summary>
@@ -45,6 +47,7 @@ namespace SandBXDSIM
             {
                 case ElementBehavior.Powder: return powder;
                 case ElementBehavior.Liquid: return liquid;
+                case ElementBehavior.Solid: return solid;
                 default:
                     throw new System.InvalidOperationException(
                         $"No CellBehavior registered for '{behavior}'. Add one in Stepper.HandlerFor (and CellBehavior.IsDynamic).");

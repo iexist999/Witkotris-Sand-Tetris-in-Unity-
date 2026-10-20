@@ -46,7 +46,7 @@ namespace SandBXDSIM
             ref Cell c = ref cells[world.Index(x, y)];
             if (!c.awake)
             {
-                if (!CellBehavior.IsDynamic(behaviors[c.element])) return; // air / solids never need stepping
+                if (c.anchored || !CellBehavior.IsDynamic(behaviors[c.element])) return; // air / solids never need stepping
                 c.awake = true;
             }
             MarkAwake(x, y);

@@ -50,6 +50,10 @@ public class SimulationSettings
     /// </summary>
     public static float ImpactRestSpeed = 0.001f;
 
+    /// <summary>
+    /// should solid materials get held up by diagonal connection with anchored neighboring cells
+    /// </summary>
+    public static bool SolidSupportDiagonals = false;
 
     // default values for worldsettings
     public static int DefaultWorldChunkWidth = 16;

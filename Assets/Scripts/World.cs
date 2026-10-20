@@ -159,7 +159,11 @@ namespace SandBXDSIM
         public bool CanEnter(int from, int tx, int ty)
         {
             if (!InBounds(tx, ty)) return false;
-            return ElementDatabase.Get(Cells[ty * Width + tx].element).density
+
+            ref readonly Cell target = ref Cells[ty * Width + tx];
+            if (target.anchored) return false; // fixed in place: no density is high enough to push it out
+
+            return ElementDatabase.Get(target.element).density
                  < ElementDatabase.Get(Cells[from].element).density;
         }
 
@@ -173,7 +177,12 @@ namespace SandBXDSIM
         }
 
         public Cell MakeCell(ushort element) =>
-            new Cell { element = element, shade = (byte)(Rand() % (uint)ElementDatabase.Get(element).shadeCount) };
+            new Cell
+            {
+                element = element,
+                shade = (byte)(Rand() % (uint)ElementDatabase.Get(element).shadeCount),
+                anchored = Behaviors[element] == ElementBehavior.SuperSolid // supersolids are fixed from the start
+            };
 
         // ---------------------------------------------------------------
         // RANDOM

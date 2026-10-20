@@ -21,6 +21,10 @@ namespace SandBXDSIM
         /// </summary>
         public Vector2 velocity;
 
+        /// <summary>
+        /// does this cell act as an world anchor for other connected cells
+        /// </summary>
+        public bool anchored;
         public bool awake;
     }
 }
