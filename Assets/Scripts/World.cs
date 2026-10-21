@@ -184,6 +184,15 @@ namespace SandBXDSIM
                 anchored = Behaviors[element] == ElementBehavior.SuperSolid // supersolids are fixed from the start
             };
 
+        /// Whole cells to move, with the fraction as a probability: 0.4 -> 1 cell on ~40% of steps.
+        public int RoundStochastic(float v)
+        {
+            float a = v < 0f ? -v : v;
+            int whole = (int)a;
+            if ((Rand() & 0xFFFF) < (uint)((a - whole) * 65536f)) whole++;
+            return v < 0f ? -whole : whole;
+        }
+
         // ---------------------------------------------------------------
         // RANDOM
         // ---------------------------------------------------------------

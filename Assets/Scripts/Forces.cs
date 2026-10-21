@@ -70,6 +70,32 @@ namespace SandBXDSIM
         }
 
         // ---------------------------------------------------------------
+        // AIR RESISTANCE...
+        // ---------------------------------------------------------------
+
+        /// Pulls velocity toward the surrounding air's velocity. Zero air velocity = still-air drag.
+        public void ApplyDrag(int idx, Vector2 airVelocity)
+        {
+            if (!SimulationSettings.SimulateDrag) return;
+
+            ref Cell c = ref cells[idx];
+            // element coefficient * how thick the medium is (air = 1, vacuum = 0)
+            float k = ElementDatabase.Get(c.element).airDrag * ElementDatabase.Get(world.Medium).airDrag;
+            if (k <= 0f) return;
+
+            c.velocity -= (c.velocity - airVelocity) * Mathf.Min(k, 1f); // can't overshoot the air's velocity
+        }
+
+        public void ApplyFlutter(int idx)
+        {
+            float f = ElementDatabase.Get(cells[idx].element).airFlutter;
+            if (f <= 0f) return;
+
+            float r = (world.Rand() & 0xFFFF) / 32767.5f - 1f; // -1..1
+            cells[idx].velocity.x += r * f;
+        }
+
+        // ---------------------------------------------------------------
         // IMPACT
         // ---------------------------------------------------------------
 

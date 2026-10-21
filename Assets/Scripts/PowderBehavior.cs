@@ -8,8 +8,12 @@ namespace SandBXDSIM
     ///     lets a powder keep a pile shape)
     ///   - otherwise part of the fall speed becomes sideways speed (<see cref="Forces.TransferImpact"/>), a small
     ///     splash, and friction then slows it down again
+    ///
+    /// Two hooks let subclasses (see <see cref="AshBehavior"/>) change the feel without copying Step:
+    ///   - <see cref="ApplyForces"/>  which forces act on the cell each step
+    ///   - <see cref="ToCells"/>      how a velocity becomes a whole number of cells to move
     /// </summary>
-    internal sealed class PowderBehavior : CellBehavior
+    internal class PowderBehavior : CellBehavior
     {
         public PowderBehavior(World world, Forces forces, CellMover mover) : base(world, forces, mover) { }
 
@@ -21,12 +25,21 @@ namespace SandBXDSIM
             return !CanFallOrSlide(idx, x, y, down);
         }
 
-        public override void Step(int x, int y, int idx)
+        /// <summary>Forces applied before movement. x / y is the cell's position before it moves this step.</summary>
+        protected virtual void ApplyForces(int x, int y, int idx)
         {
-            // ---- 1. forces ----
             forces.ApplyGravity(idx);
             // future forces slot in here: forces.ApplyWind(idx); ...
             forces.ClampVelocity(idx);
+        }
+
+        /// <summary>Velocity (cells/step) to whole cells moved this step.</summary>
+        protected virtual int ToCells(float v) => Mathf.RoundToInt(v);
+
+        public override void Step(int x, int y, int idx)
+        {
+            // ---- 1. forces ----
+            ApplyForces(x, y, idx);
 
             // ---- 2. movement ----
             var pos = new CellPos(x, y, idx); // where the cell currently is (it changes as it swaps)
@@ -35,7 +48,7 @@ namespace SandBXDSIM
             bool landed = false;
 
             // --- vertical axis ---
-            int dy = Mathf.RoundToInt(cells[pos.idx].velocity.y);
+            int dy = ToCells(cells[pos.idx].velocity.y);
             if (dy != 0 && !mover.MoveAxis(ref pos, 0, dy))
             {
                 // blocked: impact
@@ -54,7 +67,7 @@ namespace SandBXDSIM
                 Element el = ElementDatabase.Get(cells[pos.idx].element);
 
                 float transfer = (el.velocityTransfer + Random.Range(-el.velocityTransferDeviation, el.velocityTransferDeviation)) *
-                    SimulationSettings.PowderImpactTransferMultiplier * 
+                    SimulationSettings.PowderImpactTransferMultiplier *
                     SimulationSettings.ImpactTransferMultiplier;
 
                 // held by friction, or flat ground: part of the fall speed becomes sideways speed (a small splash)
@@ -62,8 +75,8 @@ namespace SandBXDSIM
             }
 
             // --- horizontal axis ---
-            // non-zero after an impact transfer (or if something else pushed it: wind, explosions... later)
-            int dx = Mathf.RoundToInt(cells[pos.idx].velocity.x);
+            // non-zero after an impact transfer, or when something else pushed it (wind for dust, explosions later)
+            int dx = ToCells(cells[pos.idx].velocity.x);
             if (dx != 0 && !mover.MoveAxis(ref pos, dx, 0))
                 cells[pos.idx].velocity.x = 0f; // hit a wall or a denser neighbour
 

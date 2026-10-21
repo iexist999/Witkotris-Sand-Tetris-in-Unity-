@@ -24,6 +24,7 @@ namespace SandBXDSIM
         readonly PowderBehavior powder;
         readonly LiquidBehavior liquid;
         readonly SolidBehavior solid;
+        readonly AshBehavior ash;
 
         bool leftToRight;
 
@@ -40,6 +41,7 @@ namespace SandBXDSIM
             powder = new PowderBehavior(world, forces, mover);
             liquid = new LiquidBehavior(world, forces, mover);
             solid = new SolidBehavior(world, forces, mover, support);
+            ash = new AshBehavior(world, forces, mover, airField);
         }
 
         /// <summary>Maps an ElementBehavior to the class that implements it. Keep in sync with CellBehavior.IsDynamic.</summary>
@@ -48,6 +50,7 @@ namespace SandBXDSIM
             switch (behavior)
             {
                 case ElementBehavior.Powder: return powder;
+                case ElementBehavior.Ash: return ash;
                 case ElementBehavior.Liquid: return liquid;
                 case ElementBehavior.Solid: return solid;
                 default:

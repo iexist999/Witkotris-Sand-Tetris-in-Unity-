@@ -142,6 +142,12 @@ namespace SandBXDSIM
         // Airfield manipulation
 
         public Vector2 WindAt(int x, int y) => airField.VelocityAt(x, y);
-        public void AddWind(int x, int y, Vector2 v) { if (world.InBounds(x, y)) airField.Impulse(x, y, v); }
+
+        public void AddWind(int x, int y, Vector2 v)
+        {
+            if (!world.InBounds(x, y)) return;
+            airField.Impulse(x, y, v);
+            waker.Wake(x, y); // resting dust here has to notice the wind
+        }
     }
 }

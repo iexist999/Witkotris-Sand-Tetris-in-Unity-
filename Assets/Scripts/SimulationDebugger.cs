@@ -3,16 +3,16 @@ using UnityEngine;
 namespace SandBXDSIM
 {
     /// <summary>
-    /// Debug overlay for the simulation hierarchy. Currently draws outlines of zones, areas and chunks,
-    /// each level with its own on/off switch and its own awake / sleeping colour.
+    /// Debug overlay for the simulation. Draws outlines of zones, areas and chunks (each level with its own
+    /// on/off switch and its own awake / sleeping colour) and, optionally, the wind field as arrows.
     ///
     /// Drawn with Gizmos, so it works in every render pipeline: always visible in the Scene view, and in the
     /// Game view when the "Gizmos" toggle in that view's toolbar is on. Play mode only (the hierarchy is
     /// built when the Simulation wakes up). Add it to any GameObject.
     ///
-    /// Draw order: zones, then areas, then chunks (smaller levels on top). Inside each level the sleeping
-    /// outlines are drawn first and the awake ones on top, so an awake edge is never hidden by a sleeping
-    /// neighbour that shares the same border line.
+    /// Draw order: zones, then areas, then chunks (smaller levels on top), then the wind arrows on top of everything.
+    /// Inside each outline level the sleeping outlines are drawn first and the awake ones on top, so an awake
+    /// edge is never hidden by a sleeping neighbour that shares the same border line.
     /// </summary>
     public class SimulationDebugger : MonoBehaviour
     {
@@ -43,6 +43,20 @@ namespace SandBXDSIM
         public LevelStyle areas = new LevelStyle(true, new Color(0.10f, 0.85f, 1.00f, 1.0f), new Color(0.10f, 0.30f, 0.45f, 0.6f));
         public LevelStyle chunks = new LevelStyle(true, new Color(0.20f, 1.00f, 0.20f, 0.9f), new Color(0.35f, 0.35f, 0.35f, 0.35f));
 
+        [Header("Airflow")]
+        [Tooltip("Draw one arrow per block of cells, pointing where the wind blows")]
+        public bool drawAirflow = true;
+        [Tooltip("One arrow per N x N cells. Lower = denser (and slower to draw).")]
+        [Range(1, 16)] public int arrowSpacing = 4;
+        [Tooltip("Arrow length in cells per 1 cell/step of wind. Capped at 1.5x the spacing so neighbours don't overlap.")]
+        [Min(0f)] public float arrowScale = 3f;
+        [Tooltip("Wind slower than this (cells/step) gets no arrow")]
+        [Min(0f)] public float minSpeed = 0.02f;
+        [Tooltip("Wind speed (cells/step) at which the arrow reaches the fast colour")]
+        [Min(0.01f)] public float colorMaxSpeed = 2f;
+        public Color slowColor = new Color(0.40f, 0.80f, 1.00f, 0.85f);
+        public Color fastColor = new Color(1.00f, 0.30f, 0.20f, 1.00f);
+
         // per-draw state
         Transform gridTransform;
         float cellSize; // world units per cell (before the transform's own scale)
@@ -72,6 +86,7 @@ namespace SandBXDSIM
                 DrawChunks(layout, false);
                 DrawChunks(layout, true);
             }
+            if (drawAirflow) DrawAirflow(layout);
 
             Gizmos.color = previous;
         }
@@ -132,6 +147,60 @@ namespace SandBXDSIM
         }
 
         // ---------------------------------------------------------------
+        // AIRFLOW
+        // ---------------------------------------------------------------
+        /// <summary>
+        /// One arrow per arrowSpacing x arrowSpacing block, sampled at the block's centre. Direction = wind direction,
+        /// length = wind speed (capped), colour = wind speed (slowColor -> fastColor). Still air and walls draw nothing.
+        /// </summary>
+        void DrawAirflow(WorldLayout layout)
+        {
+            int step = arrowSpacing;
+            int half = step / 2;
+            float maxLength = step * 1.5f;
+            float minSqr = minSpeed * minSpeed;
+
+            for (int y = half; y < layout.CellsY; y += step)
+            {
+                for (int x = half; x < layout.CellsX; x += step)
+                {
+                    Vector2 wind = simulation.WindAt(x, y);
+                    float sqr = wind.sqrMagnitude;
+                    if (sqr < minSqr || sqr == 0f) continue;
+
+                    float speed = Mathf.Sqrt(sqr);
+                    float length = Mathf.Min(speed * arrowScale, maxLength); // in cells
+                    Vector2 vec = wind / speed * length;
+
+                    Gizmos.color = Color.Lerp(slowColor, fastColor, Mathf.Clamp01(speed / colorMaxSpeed));
+                    DrawArrow(new Vector2(x + 0.5f, y + 0.5f), vec);
+                }
+            }
+        }
+
+        /// <summary>Line from 'from' to 'from + vec' (both in cell coordinates) with a small two-line arrowhead.</summary>
+        void DrawArrow(Vector2 from, Vector2 vec)
+        {
+            Vector2 tip = from + vec;
+            Gizmos.DrawLine(CellPoint(from.x, from.y), CellPoint(tip.x, tip.y));
+
+            float length = vec.magnitude;
+            Vector2 back = -vec / length * Mathf.Min(length * 0.35f, 1.5f); // head size in cells, never huge
+
+            Vector2 h1 = tip + Rotate(back, 28f);
+            Vector2 h2 = tip + Rotate(back, -28f);
+            Gizmos.DrawLine(CellPoint(tip.x, tip.y), CellPoint(h1.x, h1.y));
+            Gizmos.DrawLine(CellPoint(tip.x, tip.y), CellPoint(h2.x, h2.y));
+        }
+
+        static Vector2 Rotate(Vector2 v, float degrees)
+        {
+            float r = degrees * Mathf.Deg2Rad;
+            float c = Mathf.Cos(r), s = Mathf.Sin(r);
+            return new Vector2(v.x * c - v.y * s, v.x * s + v.y * c);
+        }
+
+        // ---------------------------------------------------------------
         // DRAWING
         // ---------------------------------------------------------------
         /// <summary>Outlines a rectangle given in cells (xMin / yMin inclusive, xMax / yMax exclusive).</summary>
@@ -149,7 +218,10 @@ namespace SandBXDSIM
         }
 
         /// <summary>World position of a grid corner (the grid's origin is the sprite's bottom-left, like in SimulationRenderer).</summary>
-        Vector3 CellCorner(int x, int y) =>
+        Vector3 CellCorner(int x, int y) => CellPoint(x, y);
+
+        /// <summary>World position of a point given in (fractional) cell coordinates, respecting the grid's position / rotation / scale.</summary>
+        Vector3 CellPoint(float x, float y) =>
             gridTransform.TransformPoint(new Vector3(x * cellSize, y * cellSize, 0f));
     }
 }

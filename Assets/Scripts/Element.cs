@@ -30,7 +30,11 @@ namespace SandBXDSIM
         public float cohesion;
 
         // === Other Properties
+        //gravity
         public float gravityInfluence;
+        //air influence
+        public float airDrag;     // share of (velocity - air velocity) lost per step, 0..1. 0 = ignores air
+        public float airFlutter;  // random sideways kick per step, cells/step
 
         // === Behavior
         public ElementBehavior behavior;
@@ -40,7 +44,7 @@ namespace SandBXDSIM
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
             /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion,
-            /*Other*/float gravityInfluence)
+            /*Other*/float gravityInfluence, float airDrag, float airFlutter)
         {
             // Identity
             this.name = name;
@@ -70,6 +74,9 @@ namespace SandBXDSIM
             // Other Properties
             this.gravityInfluence = gravityInfluence;
 
+            this.airDrag = airDrag;
+            this.airFlutter = airFlutter;
+
             // Behavior
             this.behavior = BehaviorFor(type);
         }
@@ -82,6 +89,7 @@ namespace SandBXDSIM
                 case ElementType.SuperSolid: return ElementBehavior.SuperSolid;
                 case ElementType.Solid: return ElementBehavior.Solid;
                 case ElementType.Powder: return ElementBehavior.Powder;
+                case ElementType.Ash: return ElementBehavior.Ash;
                 case ElementType.Liquid: return ElementBehavior.Liquid;
                 case ElementType.Gas: return ElementBehavior.Gas;
                 default: return ElementBehavior.Custom; // Plasma etc.

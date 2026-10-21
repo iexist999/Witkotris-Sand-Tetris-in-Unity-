@@ -55,10 +55,13 @@ public class SimulationSettings
     /// </summary>
     public static bool SolidSupportDiagonals = false;
 
+    // air simulation settings
     public static float WindDiffusion = 0.25f; // 0..1, keep it at or below ~0.5
     public static float WindDecay = 0.97f;     // per step
     public static float WindCoupling = 0.1f;   // how much a moving cell pushes the air
     public static float WindMaxSpeed = 8f;
+    public static float WindWakeSpeed = 0.2f; // wind stronger than this keeps dust awake
+    public static bool SimulateDrag = true;
 
     // default values for worldsettings
     public static int DefaultWorldChunkWidth = 16;

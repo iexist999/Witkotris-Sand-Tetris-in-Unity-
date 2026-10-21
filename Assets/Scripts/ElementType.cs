@@ -1,4 +1,4 @@
 namespace SandBXDSIM
 {
-    public enum ElementType : byte { Atmosphere, SuperSolid, Solid, Powder, Liquid, Gas, Plasma }
+    public enum ElementType : byte { Atmosphere, SuperSolid, Solid, Powder, Ash, Liquid, Gas, Plasma }
 }

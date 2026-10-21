@@ -13,10 +13,21 @@ namespace SandBXDSIM
         public string brushElement = "sand";
         [Range(0, 10)] public int brushRadius = 0;
 
+        [Header("Wind (hold middle mouse and drag)")]
+        [Tooltip("Wind added per cell of mouse travel in one frame. Raise for a stronger blow.")]
+        public float windStrength = 0.05f;
+        [Tooltip("Mouse travel per frame (in cells) beyond which a faster swipe adds no extra power.")]
+        public float windMaxSwipe = 12f;
+        [Range(0, 6)] public int windRadius = 2;
+
         ushort brushId;
         bool brushValid;
         string resolvedName;
         Camera cam;
+
+        // wind drag state
+        bool windActive;
+        Vector2Int lastWindCell;
 
         void Start()
         {
@@ -39,6 +50,7 @@ namespace SandBXDSIM
             if (brushElement != resolvedName) ResolveBrush(); // inspector edit at runtime
             HandleHotkeys();
             HandleDrawing();
+            HandleWind();
         }
 
         void ResolveBrush()
@@ -96,6 +108,58 @@ namespace SandBXDSIM
                     {
                         simulation.SetCell(x, y, brushId);
                     }
+                }
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // WIND: middle mouse. Direction = how the mouse moved since the last frame, power = how far it moved.
+        // ---------------------------------------------------------------
+        void HandleWind()
+        {
+            if (!Input.GetMouseButton(2))
+            {
+                windActive = false;
+                return;
+            }
+
+            Vector3 mouseWorld = cam.ScreenToWorldPoint(Input.mousePosition);
+            Vector2Int cell = view.WorldToCell(mouseWorld);
+
+            // first frame of the press: there is no previous position yet, so no direction
+            if (!windActive)
+            {
+                windActive = true;
+                lastWindCell = cell;
+                return;
+            }
+
+            Vector2Int delta = cell - lastWindCell;
+            if (delta == Vector2Int.zero) return; // lastWindCell is kept, so a slow drag still adds up to a full cell
+
+            Vector2 dir = ((Vector2)delta).normalized;
+            float power = Mathf.Min(delta.magnitude, windMaxSwipe) * windStrength;
+            Vector2 impulse = dir * power;
+
+            // blow along the whole path the mouse covered, not just where it ended up, so fast swipes leave no gaps
+            var path = GridHelper.GetLineTraversalPositionsBR(lastWindCell.x, lastWindCell.y, cell.x, cell.y);
+            foreach (var p in path)
+                BlowAirFlowAt(p.X, p.Y, impulse);
+
+            lastWindCell = cell;
+        }
+
+        void BlowAirFlowAt(int cx, int cy, Vector2 impulse)
+        {
+            int r2 = windRadius * windRadius;
+
+            for (int dy = -windRadius; dy <= windRadius; dy++)
+            {
+                for (int dx = -windRadius; dx <= windRadius; dx++)
+                {
+                    if (dx * dx + dy * dy > r2) continue;
+
+                    simulation.AddWind(cx + dx, cy + dy, impulse); // bounds-checked inside
                 }
             }
         }
