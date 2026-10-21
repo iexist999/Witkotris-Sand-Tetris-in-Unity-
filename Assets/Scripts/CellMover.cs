@@ -26,12 +26,14 @@ namespace SandBXDSIM
     {
         readonly World world;
         readonly WakeSystem waker;
+        readonly AirField airField;
         readonly Cell[] cells;
 
-        public CellMover(World world, WakeSystem waker)
+        public CellMover(World world, WakeSystem waker, AirField airField)
         {
             this.world = world;
             this.waker = waker;
+            this.airField = airField;
             cells = world.Cells;
         }
 
@@ -80,6 +82,9 @@ namespace SandBXDSIM
             int to = world.Index(tx, ty);
             world.Swap(from, to);
             cells[from].velocity = Vector2.zero; // the displaced cell doesn't inherit our momentum
+
+            Vector2 v = cells[to].velocity;
+            if (v.sqrMagnitude > 1f) airField.Impulse(tx, ty, v * SimulationSettings.WindCoupling);
 
             world.Changed = true;
             waker.MarkAwake(tx, ty);  // the mover is awake wherever it lands, maybe in a sleeping chunk

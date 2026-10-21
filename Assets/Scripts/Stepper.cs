@@ -15,6 +15,7 @@ namespace SandBXDSIM
         readonly World world;
         readonly WakeSystem waker;
         readonly WorldLayout layout;
+        readonly AirField airField;
         readonly Cell[] cells;
         readonly ElementBehavior[] behaviors;
         readonly int width;
@@ -26,10 +27,11 @@ namespace SandBXDSIM
 
         bool leftToRight;
 
-        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover, SupportSystem support)
+        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover, SupportSystem support, AirField airField)
         {
             this.world = world;
             this.waker = waker;
+            this.airField = airField;
             layout = world.Layout;
             cells = world.Cells;
             behaviors = world.Behaviors;
@@ -59,6 +61,8 @@ namespace SandBXDSIM
         // ---------------------------------------------------------------
         public void Step()
         {
+            airField.Step();
+
             if (++world.StepId == 0) world.StepId = 1; // 0 is what fresh cells carry, so it can't be a valid "already handled" mark
             leftToRight = !leftToRight;
 

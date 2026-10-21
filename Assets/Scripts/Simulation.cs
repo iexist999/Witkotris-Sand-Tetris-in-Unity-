@@ -55,6 +55,7 @@ namespace SandBXDSIM
         WakeSystem waker;
         Stepper stepper;
         SupportSystem support;
+        AirField airField;
 
         float accumulator;
 
@@ -77,10 +78,11 @@ namespace SandBXDSIM
             world = new World(worldSettings, this);
             waker = new WakeSystem(world);
             support = new SupportSystem(world, waker);
+            airField = new AirField(world);
 
             var forces = new Forces(world);
-            var mover = new CellMover(world, waker);
-            stepper = new Stepper(world, waker, forces, mover, support);
+            var mover = new CellMover(world, waker, airField);
+            stepper = new Stepper(world, waker, forces, mover, support, airField);
         }
 
         void OnDestroy()
@@ -136,5 +138,10 @@ namespace SandBXDSIM
         public bool IsZoneAwake(int zx, int zy) => world.Zones[world.Layout.ZoneIndex(zx, zy)].awake != 0;
         public bool IsAreaAwake(int ax, int ay) => world.Areas[world.Layout.AreaIndex(ax, ay)].awake != 0;
         public bool IsChunkAwake(int cx, int cy) => world.Chunks[world.Layout.ChunkIndex(cx, cy)].awake != 0;
+
+        // Airfield manipulation
+
+        public Vector2 WindAt(int x, int y) => airField.VelocityAt(x, y);
+        public void AddWind(int x, int y, Vector2 v) { if (world.InBounds(x, y)) airField.Impulse(x, y, v); }
     }
 }

@@ -89,7 +89,7 @@ namespace SandBXDSIM
                 /*Chemical Properties*/20f, 0.30f,
                 /*Appearance*/false, 4, new Color32(125, 125, 130, 255), null,
                 /*Liquid Specific Properties*/0f, 0f, 0f,
-                /*Other Properties*/1f));
+                /*Other Properties*/0.25f));
 
             // SUPERSOLIDS ================================================
 
