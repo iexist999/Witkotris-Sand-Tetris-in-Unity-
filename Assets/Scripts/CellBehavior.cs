@@ -53,6 +53,16 @@ namespace SandBXDSIM
             return g < 0f ? -1 : 1;
         }
 
+        /// <summary>True if the cell it is about to move into is a liquid. That liquid is the one it is moving through.</summary>
+        protected bool InLiquid(int x, int y, int down, out ushort liquid)
+        {
+            liquid = 0;
+            if (!world.InBounds(x, y + down)) return false;
+
+            liquid = cells[world.Index(x, y + down)].element;
+            return world.Behaviors[liquid] == ElementBehavior.Liquid;
+        }
+
         /// <summary>can the cell fall/slide?</summary>
         protected bool CanFallOrSlide(int idx, int x, int y, int down) =>
             world.CanEnter(idx, x, y + down) ||

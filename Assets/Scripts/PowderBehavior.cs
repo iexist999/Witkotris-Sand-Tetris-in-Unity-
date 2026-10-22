@@ -29,12 +29,13 @@ namespace SandBXDSIM
         protected virtual void ApplyForces(int x, int y, int idx)
         {
             forces.ApplyGravity(idx);
+            if (InLiquid(x, y, DownOf(idx), out ushort liquid)) forces.ApplyLiquidDrag(idx, liquid);
             // future forces slot in here: forces.ApplyWind(idx); ...
             forces.ClampVelocity(idx);
         }
 
-        /// <summary>Velocity (cells/step) to whole cells moved this step.</summary>
-        protected virtual int ToCells(float v) => Mathf.RoundToInt(v);
+        protected virtual int ToCells(float v) => world.RoundStochastic(v);
+        //protected virtual int ToCells(float v) => Mathf.RoundToInt(v);
 
         public override void Step(int x, int y, int idx)
         {

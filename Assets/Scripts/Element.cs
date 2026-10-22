@@ -32,6 +32,7 @@ namespace SandBXDSIM
         public float viscosity;
         public float vorticity;
         public float cohesion;
+        public float surfaceTension;
 
         // === Other Properties
         //gravity
@@ -40,6 +41,8 @@ namespace SandBXDSIM
         public float airDrag;     // share of (velocity - air velocity) lost per step, 0..1. 0 = ignores air
         public float airFlutter;  // random sideways kick per step, cells/step
         public float airInfluence; // air influence multiplier
+        // liquid influence
+        public float liquidDrag; // influence of movement when inside liquid mediums
 
         // === Behavior
         public ElementBehavior behavior;
@@ -48,8 +51,8 @@ namespace SandBXDSIM
             /*Physical Properties*/float mass, byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
-            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion,
-            /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence)
+            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion, float surfaceTension,
+            /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
             // Identity
             this.name = name;
@@ -77,6 +80,7 @@ namespace SandBXDSIM
             this.viscosity = viscosity;
             this.vorticity = vorticity;
             this.cohesion = cohesion;
+            this.surfaceTension = surfaceTension;
 
             // Other Properties
             this.gravityInfluence = gravityInfluence;
@@ -86,7 +90,7 @@ namespace SandBXDSIM
             this.airInfluence = Mathf.Max(0f, airInfluence);
             this.airInfluence = airInfluence;
 
-            
+            this.liquidDrag = liquidDrag;
 
             // Behavior
             this.behavior = BehaviorFor(type);

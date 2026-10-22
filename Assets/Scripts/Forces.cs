@@ -96,6 +96,20 @@ namespace SandBXDSIM
         }
 
         // ---------------------------------------------------------------
+        // LIQUID RESISTANCE...
+        // ---------------------------------------------------------------
+
+        /// <summary>Slows a cell that is moving through a liquid. Velocity shrinks by k each step, so it decays gradually.</summary>
+        public void ApplyLiquidDrag(int idx, ushort liquid)
+        {
+            ref Cell c = ref cells[idx];
+            float k = ElementDatabase.Get(c.element).liquidDrag * ElementDatabase.Get(liquid).viscosity;
+            if (k <= 0f) return;
+
+            c.velocity *= 1f - Mathf.Min(k, 1f);
+        }
+
+        // ---------------------------------------------------------------
         // IMPACT
         // ---------------------------------------------------------------
 
