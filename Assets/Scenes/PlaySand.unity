@@ -254,6 +254,9 @@ MonoBehaviour:
   view: {fileID: 322835532}
   brushElement: sand
   brushRadius: 0
+  windStrength: 0.1
+  windMaxSwipe: 12
+  windRadius: 4
 --- !u!114 &322835534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,6 +283,13 @@ MonoBehaviour:
     render: 1
     awakeColor: {r: 0, g: 1, b: 0.2456789, a: 0.9}
     sleepingColor: {r: 1, g: 0, b: 0, a: 0.35}
+  drawAirflow: 1
+  arrowSpacing: 4
+  arrowScale: 3
+  minSpeed: 0.02
+  colorMaxSpeed: 2
+  slowColor: {r: 0.4, g: 0.8, b: 1, a: 0.85}
+  fastColor: {r: 1, g: 0.3, b: 0.2, a: 1}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

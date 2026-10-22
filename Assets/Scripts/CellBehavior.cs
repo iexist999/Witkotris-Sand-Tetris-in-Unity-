@@ -48,7 +48,7 @@ namespace SandBXDSIM
         /// </summary>
         protected int DownOf(int idx)
         {
-            float g = SimulationSettings.SimulationGravity.y * ElementDatabase.Get(cells[idx].element).gravityInfluence;
+            float g = SimulationSettings.SimulationGravity.y * ElementDatabase.GravityScale(cells[idx].element);
             if (g == 0f) return 0;
             return g < 0f ? -1 : 1;
         }

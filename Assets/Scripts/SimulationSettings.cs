@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class SimulationSettings
 {
-    public static Vector2 SimulationGravity = new Vector2(0, -9.81f);
-    public static float SimulationGravityFactor = 0.05f; // -9.81f * 0.05f = -0.49f added to velocity.y per step
 
     /// =================================
     /// GENERAL SETTINGS
@@ -17,6 +15,9 @@ public class SimulationSettings
     /// =================================
     /// SIMULATION PHYSICS SETTINGS
     /// =================================
+    
+    public static Vector2 SimulationGravity = new Vector2(0, -9.81f);
+    public static float SimulationGravityFactor = 0.05f; // -9.81f * 0.05f = -0.49f added to velocity.y per step
 
     /// <summary>
     /// velocity cap for the simulation
@@ -25,6 +26,8 @@ public class SimulationSettings
 
     public static bool SimulateGravity = true;
     public static bool SimulateFriction = true;
+
+    public static float MassGravityInfluence = 0.2f;
 
     /// <summary>
     /// general velocity transfer multiplier for all elementtypes
@@ -57,11 +60,18 @@ public class SimulationSettings
 
     // air simulation settings
     public static float WindDiffusion = 0.25f; // 0..1, keep it at or below ~0.5
-    public static float WindDecay = 0.97f;     // per step
+    public static float WindDecay = 0.995f;     // per step
     public static float WindCoupling = 0.1f;   // how much a moving cell pushes the air
     public static float WindMaxSpeed = 8f;
     public static float WindWakeSpeed = 0.2f; // wind stronger than this keeps dust awake
     public static bool SimulateDrag = true;
+
+    public static int WindPressureIterations = 20;  // more = stiffer air, slower
+    public static float WindOverRelaxation = 1.7f;  // 1..2, above ~1.9 gets unstable
+    public static float WindVorticity = 0.1f;       // 0 = off
+    public static bool WindOpenBoundaries = true;   // false = sealed box, air bounces off the edges
+    public static float WindSleepSpeed = 0.01f;
+    public static bool WindTrackPressure = false;   // turn on to read PressureAt()
 
     // default values for worldsettings
     public static int DefaultWorldChunkWidth = 16;

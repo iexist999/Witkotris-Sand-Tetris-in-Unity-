@@ -9,6 +9,7 @@ namespace SandBXDSIM
         public ElementType type;
 
         // === Physical Properties
+        public float mass;
         public float density;
         public float friction;
         public float velocityTransfer;
@@ -24,6 +25,9 @@ namespace SandBXDSIM
         public Color32 baseColor;
         public Color32[] customColors;
 
+        // === Atmosphere Specific Properties
+        // null
+
         // === Liquid Specific Properties
         public float viscosity;
         public float vorticity;
@@ -35,22 +39,25 @@ namespace SandBXDSIM
         //air influence
         public float airDrag;     // share of (velocity - air velocity) lost per step, 0..1. 0 = ignores air
         public float airFlutter;  // random sideways kick per step, cells/step
+        public float airInfluence; // air influence multiplier
 
         // === Behavior
         public ElementBehavior behavior;
 
         public Element(/*Identity*/string name, ElementType type,
-            /*Physical Properties*/byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
+            /*Physical Properties*/float mass, byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
             /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion,
-            /*Other*/float gravityInfluence, float airDrag, float airFlutter)
+            /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence)
         {
             // Identity
             this.name = name;
             this.type = type;
 
             // Physical Properties
+            this.mass = Mathf.Max(0f, mass);
+            this.mass = mass;
             this.density = density;
             this.friction = friction;
             this.velocityTransfer = velocityTransfer;
@@ -76,6 +83,10 @@ namespace SandBXDSIM
 
             this.airDrag = airDrag;
             this.airFlutter = airFlutter;
+            this.airInfluence = Mathf.Max(0f, airInfluence);
+            this.airInfluence = airInfluence;
+
+            
 
             // Behavior
             this.behavior = BehaviorFor(type);

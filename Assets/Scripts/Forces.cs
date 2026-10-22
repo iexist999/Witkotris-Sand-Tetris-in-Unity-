@@ -25,10 +25,10 @@ namespace SandBXDSIM
             if (!SimulationSettings.SimulateGravity) return;
 
             ref Cell c = ref cells[idx];
-            float influence = ElementDatabase.Get(c.element).gravityInfluence;
+            float scale = ElementDatabase.GravityScale(c.element);
 
             // e.g. (0, -9.81) * 0.05 * 1.0 = (0, -0.49) added to the velocity every step
-            c.velocity += SimulationSettings.SimulationGravity * SimulationSettings.SimulationGravityFactor * influence;
+            c.velocity += SimulationSettings.SimulationGravity * SimulationSettings.SimulationGravityFactor * scale;
         }
 
         /// <summary>Caps both velocity axes at SimulationSettings.SimulationMaxVelocity. Call after the forces, before moving.</summary>

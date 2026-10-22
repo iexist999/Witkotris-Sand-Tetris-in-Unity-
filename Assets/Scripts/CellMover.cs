@@ -83,8 +83,9 @@ namespace SandBXDSIM
             world.Swap(from, to);
             cells[from].velocity = Vector2.zero; // the displaced cell doesn't inherit our momentum
 
-            Vector2 v = cells[to].velocity;
-            if (v.sqrMagnitude > 1f) airField.Impulse(tx, ty, v * SimulationSettings.WindCoupling);
+            // a moving cell drags the air with it; airInfluence scales how hard
+            Vector2 push = cells[to].velocity * ElementDatabase.Get(cells[to].element).airInfluence;
+            if (push.sqrMagnitude > 1f) airField.Impulse(tx, ty, push * SimulationSettings.WindCoupling);
 
             world.Changed = true;
             waker.MarkAwake(tx, ty);  // the mover is awake wherever it lands, maybe in a sleeping chunk
