@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace SandBXDSIM
@@ -15,7 +16,12 @@ namespace SandBXDSIM
     /// </summary>
     internal class PowderBehavior : CellBehavior
     {
-        public PowderBehavior(World world, Forces forces, CellMover mover) : base(world, forces, mover) { }
+        protected readonly FlowSystem flowSystem;
+
+        public PowderBehavior(World world, Forces forces, CellMover mover, FlowSystem flowSystem) : base(world, forces, mover)
+        {
+            this.flowSystem = flowSystem;
+        }
 
         public override bool IsSettled(int x, int y, int idx)
         {
@@ -29,8 +35,8 @@ namespace SandBXDSIM
         protected virtual void ApplyForces(int x, int y, int idx)
         {
             forces.ApplyGravity(idx);
-            if (InLiquid(x, y, DownOf(idx), out ushort liquid)) forces.ApplyLiquidDrag(idx, liquid);
-            // future forces slot in here: forces.ApplyWind(idx); ...
+            if (InLiquid(x, y, DownOf(idx), out ushort liquid))
+                forces.ApplyLiquidDrag(idx, liquid, flowSystem.VelocityAt(x, y));
             forces.ClampVelocity(idx);
         }
 

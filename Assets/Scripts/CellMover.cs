@@ -26,14 +26,14 @@ namespace SandBXDSIM
     {
         readonly World world;
         readonly WakeSystem waker;
-        readonly AirField airField;
+        readonly FlowSystem flowSystem;
         readonly Cell[] cells;
 
-        public CellMover(World world, WakeSystem waker, AirField airField)
+        public CellMover(World world, WakeSystem waker, FlowSystem flowSystem)
         {
             this.world = world;
             this.waker = waker;
-            this.airField = airField;
+            this.flowSystem = flowSystem;
             cells = world.Cells;
         }
 
@@ -85,7 +85,8 @@ namespace SandBXDSIM
 
             // a moving cell drags the air with it; airInfluence scales how hard
             Vector2 push = cells[to].velocity * ElementDatabase.Get(cells[to].element).airInfluence;
-            if (push.sqrMagnitude > 1f) airField.Impulse(tx, ty, push * SimulationSettings.WindCoupling);
+            //if (push.sqrMagnitude > 1f) flowSystem.Push(tx, ty, push);
+            flowSystem.Push(tx, ty, push);
 
             world.Changed = true;
             waker.MarkAwake(tx, ty);  // the mover is awake wherever it lands, maybe in a sleeping chunk

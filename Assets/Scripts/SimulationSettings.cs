@@ -59,19 +59,54 @@ public class SimulationSettings
     public static bool SolidSupportDiagonals = false;
 
     // air simulation settings
-    public static float WindDiffusion = 0.25f; // 0..1, keep it at or below ~0.5
-    public static float WindDecay = 0.995f;     // per step
-    public static float WindCoupling = 0.1f;   // how much a moving cell pushes the air
-    public static float WindMaxSpeed = 8f;
+    //public static float WindDiffusion = 0.25f; // 0..1, keep it at or below ~0.5
+    //public static float WindDecay = 0.995f;     // per step
+    //public static float WindCoupling = 0.1f;   // how much a moving cell pushes the air
+    //public static float WindMaxSpeed = 8f;
     public static float WindWakeSpeed = 0.2f; // wind stronger than this keeps dust awake
     public static bool SimulateDrag = true;
 
-    public static int WindPressureIterations = 20;  // more = stiffer air, slower
-    public static float WindOverRelaxation = 1.7f;  // 1..2, above ~1.9 gets unstable
-    public static float WindVorticity = 0.1f;       // 0 = off
-    public static bool WindOpenBoundaries = true;   // false = sealed box, air bounces off the edges
-    public static float WindSleepSpeed = 0.01f;
-    public static bool WindTrackPressure = false;   // turn on to read PressureAt()
+    public static readonly FlowSettings AirFlow = new FlowSettings
+    {
+        element = null,          // default medium
+        decay = 0.995f,
+        maxSpeed = 8f,
+        coupling = 0.1f,
+        iterations = 20,
+        openBoundaries = true,
+    };
+
+    public static readonly FlowSettings WaterFlow = new FlowSettings
+    {
+        element = "water",       // its vorticity property drives this field
+        decay = 0.98f,
+        maxSpeed = 3f,
+        coupling = 0.3f,
+        iterations = 30,
+        openBoundaries = false,   // sealed: water can't leave the world
+    };
+
+    //public static int WindPressureIterations = 20;  // more = stiffer air, slower
+    //public static float WindOverRelaxation = 1.7f;  // 1..2, above ~1.9 gets unstable
+    //public static float WindVorticity = 0.1f;       // 0 = off
+    //public static bool WindOpenBoundaries = true;   // false = sealed box, air bounces off the edges
+    //public static float WindSleepSpeed = 0.01f;
+    //public static bool WindTrackPressure = false;   // turn on to read PressureAt()
+
+    public sealed class FlowSettings
+    {
+        public string element;
+        public float vorticityScale = 1f;
+        public float decay = 0.99f;
+        public float maxSpeed = 5f;
+        public float coupling = 0.01f;
+        public int iterations = 20;
+        public float overRelaxation = 1.7f;
+        public float sleepSpeed = 0.01f;
+        public bool openBoundaries = true;
+        public bool trackPressure;
+        public float pushThreshold = 4.65f;
+    }
 
     // default values for worldsettings
     public static int DefaultWorldChunkWidth = 16;

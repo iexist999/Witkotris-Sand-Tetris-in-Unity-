@@ -55,7 +55,7 @@ namespace SandBXDSIM
         WakeSystem waker;
         Stepper stepper;
         SupportSystem support;
-        AirField airField;
+        FlowSystem flowSystem;
 
         float accumulator;
 
@@ -78,11 +78,11 @@ namespace SandBXDSIM
             world = new World(worldSettings, this);
             waker = new WakeSystem(world);
             support = new SupportSystem(world, waker);
-            airField = new AirField(world);
+            flowSystem = new FlowSystem(world);
 
             var forces = new Forces(world);
-            var mover = new CellMover(world, waker, airField);
-            stepper = new Stepper(world, waker, forces, mover, support, airField);
+            var mover = new CellMover(world, waker, flowSystem);
+            stepper = new Stepper(world, waker, forces, mover, support, flowSystem);
         }
 
         void OnDestroy()
@@ -141,12 +141,12 @@ namespace SandBXDSIM
 
         // Airfield manipulation
 
-        public Vector2 WindAt(int x, int y) => airField.VelocityAt(x, y);
+        public Vector2 WindAt(int x, int y) => flowSystem.VelocityAt(x, y);
 
         public void AddWind(int x, int y, Vector2 v)
         {
             if (!world.InBounds(x, y)) return;
-            airField.Impulse(x, y, v);
+            flowSystem.Impulse(x, y, v);
             waker.Wake(x, y); // resting dust here has to notice the wind
         }
     }

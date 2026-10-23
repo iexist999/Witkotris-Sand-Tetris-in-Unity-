@@ -100,13 +100,13 @@ namespace SandBXDSIM
         // ---------------------------------------------------------------
 
         /// <summary>Slows a cell that is moving through a liquid. Velocity shrinks by k each step, so it decays gradually.</summary>
-        public void ApplyLiquidDrag(int idx, ushort liquid)
+        public void ApplyLiquidDrag(int idx, ushort liquid, Vector2 flow)
         {
             ref Cell c = ref cells[idx];
             float k = ElementDatabase.Get(c.element).liquidDrag * ElementDatabase.Get(liquid).viscosity;
             if (k <= 0f) return;
 
-            c.velocity *= 1f - Mathf.Min(k, 1f);
+            c.velocity = flow + (c.velocity - flow) * (1f - Mathf.Min(k, 1f));
         }
 
         // ---------------------------------------------------------------

@@ -89,8 +89,8 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 100, 0.005f, 0.4f, 0.1f,
                 /*Chemical Properties*/20f, 0.50f,
                 /*Appearance*/false, 4, new Color32(0, 0, 255, 255), null,
-                /*Liquid Specific Properties*/0.5f, 0.8f, 0.6f, 0.8f,
-                /*Other Properties*/1f, 0.3f, 0.1f, 1f, 1f));
+                /*Liquid Specific Properties*/0.5f, 0.02f, 0.6f, 0.8f,
+                /*Other Properties*/1f, 0.3f, 0.1f, 1f, 1.1f));
 
             // SOLIDS ====================================================
 

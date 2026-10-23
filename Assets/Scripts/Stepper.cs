@@ -15,7 +15,7 @@ namespace SandBXDSIM
         readonly World world;
         readonly WakeSystem waker;
         readonly WorldLayout layout;
-        readonly AirField airField;
+        readonly FlowSystem flowSystem;
         readonly Cell[] cells;
         readonly ElementBehavior[] behaviors;
         readonly int width;
@@ -28,20 +28,20 @@ namespace SandBXDSIM
 
         bool leftToRight;
 
-        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover, SupportSystem support, AirField airField)
+        public Stepper(World world, WakeSystem waker, Forces forces, CellMover mover, SupportSystem support, FlowSystem flowSystem)
         {
             this.world = world;
             this.waker = waker;
-            this.airField = airField;
+            this.flowSystem = flowSystem;
             layout = world.Layout;
             cells = world.Cells;
             behaviors = world.Behaviors;
             width = world.Width;
 
-            powder = new PowderBehavior(world, forces, mover);
+            powder = new PowderBehavior(world, forces, mover, flowSystem);
             liquid = new LiquidBehavior(world, forces, mover);
             solid = new SolidBehavior(world, forces, mover, support);
-            ash = new AshBehavior(world, forces, mover, airField);
+            ash = new AshBehavior(world, forces, mover, flowSystem);
         }
 
         /// <summary>Maps an ElementBehavior to the class that implements it. Keep in sync with CellBehavior.IsDynamic.</summary>
@@ -64,7 +64,7 @@ namespace SandBXDSIM
         // ---------------------------------------------------------------
         public void Step()
         {
-            airField.Step();
+            flowSystem.Step();
 
             if (++world.StepId == 0) world.StepId = 1; // 0 is what fresh cells carry, so it can't be a valid "already handled" mark
             leftToRight = !leftToRight;
