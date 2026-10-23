@@ -106,6 +106,9 @@ public class SimulationSettings
         public bool openBoundaries = true;
         public bool trackPressure;
         public float pushThreshold = 4.65f;
+
+        public float vorticityMinCurl = 0.08f;     // swirls weaker than this get no confinement at all
+        public float vorticityFullCurl = 0.6f;    // swirls stronger than this get the full strength; in between it ramps up
     }
 
     // default values for worldsettings

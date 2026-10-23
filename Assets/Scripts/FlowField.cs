@@ -262,14 +262,18 @@ namespace SandBXDSIM
 
         /// <summary>
         /// Advection smooths small swirls away; this adds a force that pushes fluid around each vortex core in the
-        /// direction it already spins. Only cells of THIS field get a force (wall cells are skipped, and faces shared
-        /// with another medium are zeroed afterwards), so confinement can't leak across the air / water boundary and
-        /// each field uses its own strength.
+        /// direction it already spins. Swirls weaker than FlowSettings.vorticityMinCurl get nothing (they just decay),
+        /// and the strength ramps up smoothly to the full value at vorticityFullCurl.
         ///
-        ///   w = dv/dx - du/dy,   N = grad|w| / |grad|w||,   f = strength * (N.y * w, -N.x * w)
+        ///   w = dv/dx - du/dy,   N = grad|w| / |grad|w||,   f = strength * ramp(|w|) * (N.y * w, -N.x * w)
         /// </summary>
         void ConfineVorticity(float strength)
         {
+            // NEW: the ramp limits, read once
+            float lo = s.vorticityMinCurl;
+            float hi = Mathf.Max(s.vorticityFullCurl, lo + 0.0001f); // keeps the division below safe
+
+            // ---- pass 1: curl at every cell (unchanged) ----
             for (int y = 0; y < height; y++)
             {
                 int yd = y > 0 ? y - 1 : y, yu = y < height - 1 ? y + 1 : y;
@@ -285,6 +289,7 @@ namespace SandBXDSIM
                 }
             }
 
+            // ---- pass 2: the force ----
             for (int y = 1; y < height - 1; y++)
             {
                 for (int x = 1; x < width - 1; x++)
@@ -292,12 +297,21 @@ namespace SandBXDSIM
                     int c = y * width + x;
                     if (fs[(y + 1) * padW + x + 1] == 0) continue;
 
+                    // NEW: how strong is the swirl here? too weak = not a vortex, skip it
+                    float w = curl[c];
+                    float a = w < 0f ? -w : w;
+                    if (a <= lo) continue;
+
                     float gx = (Mathf.Abs(curl[c + 1]) - Mathf.Abs(curl[c - 1])) * 0.5f;
                     float gy = (Mathf.Abs(curl[c + width]) - Mathf.Abs(curl[c - width])) * 0.5f;
                     float len = Mathf.Sqrt(gx * gx + gy * gy);
                     if (len < 1e-5f) continue;
 
-                    float k = strength * curl[c] / len;
+                    // NEW: 0 at lo, 1 at hi, smooth in between
+                    float t = Mathf.Clamp01((a - lo) / (hi - lo));
+                    float ramp = t * t * (3f - 2f * t);
+
+                    float k = strength * ramp * w / len;   // NEW: "* ramp" is the only change to this line
                     float fx = gy * k;
                     float fy = -gx * k;
 
