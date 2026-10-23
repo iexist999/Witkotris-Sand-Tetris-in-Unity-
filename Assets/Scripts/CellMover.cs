@@ -82,6 +82,7 @@ namespace SandBXDSIM
             int to = world.Index(tx, ty);
             world.Swap(from, to);
             cells[from].velocity = Vector2.zero; // the displaced cell doesn't inherit our momentum
+            cells[from].freeFalling = true; // the displaced cell changed cells too
 
             // a moving cell drags the air with it; airInfluence scales how hard
             Vector2 push = cells[to].velocity * ElementDatabase.Get(cells[to].element).airInfluence;
@@ -91,7 +92,39 @@ namespace SandBXDSIM
             world.Changed = true;
             waker.MarkAwake(tx, ty);  // the mover is awake wherever it lands, maybe in a sleeping chunk
             waker.WakeAround(fx, fy); // the vacated spot, whatever got displaced into it, and everything touching it may now move
+            waker.WakeSlideReach(fx, fy, 1 + SimulationSettings.PowderMaxExtraStack);
             return to;
+        }
+
+        /// <summary>
+        /// A powder that just moved shakes its 8 neighbours: every resting powder rolls against its own
+        /// inertialResistance and, if it loses, becomes free falling and is woken so it can act on it.
+        /// </summary>
+        public void Disturb(int x, int y)
+        {
+            for (int dy = -1; dy <= 1; dy++)
+            {
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+
+                    int nx = x + dx, ny = y + dy;
+                    if (!world.InBounds(nx, ny)) continue;
+
+                    ref Cell n = ref cells[world.Index(nx, ny)];
+                    if (n.freeFalling || n.anchored) continue;
+
+                    ElementBehavior b = world.Behaviors[n.element];
+                    if (b != ElementBehavior.Powder && b != ElementBehavior.Ash) continue;
+
+                    float r = ElementDatabase.Get(n.element).inertialResistance;
+                    if (r <= 0f) continue;                                       // no inertia: always free anyway
+                    if ((world.Rand() & 0xFFFF) < (uint)(r * 65536f)) continue;  // it resisted
+
+                    n.freeFalling = true;
+                    waker.Wake(nx, ny); // a sleeping cell would never notice otherwise
+                }
+            }
         }
     }
 }

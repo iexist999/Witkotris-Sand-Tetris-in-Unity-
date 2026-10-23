@@ -21,6 +21,9 @@ namespace SandBXDSIM
         /// </summary>
         public Vector2 velocity;
 
+        /// <summary>True while a powder is moving or was just shaken loose. Resting powders only look straight down.</summary>
+        public bool freeFalling;
+
         /// <summary>
         /// does this cell act as an world anchor for other connected cells
         /// </summary>

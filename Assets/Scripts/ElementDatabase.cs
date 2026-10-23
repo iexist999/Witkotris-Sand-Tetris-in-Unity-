@@ -51,6 +51,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 0, 0f, 0.8f, 0f,
                 /*Chemical Properties*/20f, 0.02f,
                 /*Appearance*/false, 1, new Color32(0, 0, 0, 0), null,
+                /*Powder Specific Properties*/1f, 0f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/1f, 0.3f, 0.1f, 0f, 1f));
 
@@ -61,6 +62,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 150, 0.02f, 0.05f, 0.1f,
                 /*Chemical Properties*/20f, 0.10f,
                 /*Appearance*/false, 6, new Color32(222, 192, 110, 255), null,
+                /*Powder Specific Properties*/1f, 0.7f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/1f, 0.3f, 0.1f, 3f, 1f));
 
@@ -69,6 +71,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 150, 0.05f, 0.05f, 0.1f,
                 /*Chemical Properties*/20f, 0.10f,
                 /*Appearance*/false, 5, new Color32(110, 75, 45, 255), null,
+                /*Powder Specific Properties*/1f, 0.95f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/1f, 0.3f, 0.1f, 5f, 1f));
 
@@ -79,6 +82,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/20f, 30, 0.1f, 0.005f, 0.005f,
                 /*Chemical Properties*/20f, 0.10f,
                 /*Appearance*/false, 3, new Color32(204, 200, 188, 255), null,
+                /*Powder Specific Properties*/1f, 0f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/0.5f, 0.7f, 0.15f, 2f, 1f));
 
@@ -89,6 +93,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 100, 0.005f, 0.4f, 0.1f,
                 /*Chemical Properties*/20f, 0.50f,
                 /*Appearance*/false, 4, new Color32(0, 0, 255, 255), null,
+                /*Powder Specific Properties*/1f, 0f,
                 /*Liquid Specific Properties*/0.5f, 0.01f, 0.6f, 0.8f,
                 /*Other Properties*/1f, 0.3f, 0.1f, 1f, 1.1f));
 
@@ -98,6 +103,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 255, 0f, 0f, 0f,
                 /*Chemical Properties*/20f, 0.30f,
                 /*Appearance*/false, 4, new Color32(125, 125, 130, 255), null,
+                /*Powder Specific Properties*/1f, 0f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/0.25f, 0.3f, 0.1f, 8f, 1f));
 
@@ -107,6 +113,7 @@ namespace SandBXDSIM
                 /*Physical Properties*/100f, 255, 0f, 0f, 0f,
                 /*Chemical Properties*/20f, 0.30f,
                 /*Appearance*/false, 1, new Color32(215, 70, 150, 255), null,
+                /*Powder Specific Properties*/1f, 0f,
                 /*Liquid Specific Properties*/0f, 0f, 0f, 0f,
                 /*Other Properties*/0f, 0.3f, 0.1f, 5f, 1f));
         }

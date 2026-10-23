@@ -28,6 +28,10 @@ namespace SandBXDSIM
         // === Atmosphere Specific Properties
         // null
 
+        // === Powder Specific Properties
+        public float powderStackability;
+        public float inertialResistance;
+
         // === Liquid Specific Properties
         public float viscosity;
         public float vorticity;
@@ -51,6 +55,7 @@ namespace SandBXDSIM
             /*Physical Properties*/float mass, byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
+            /*Powder Specific Properties*/ float powderStackability, float inertialResistance,
             /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion, float surfaceTension,
             /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
@@ -59,8 +64,8 @@ namespace SandBXDSIM
             this.type = type;
 
             // Physical Properties
-            this.mass = Mathf.Max(0f, mass);
             this.mass = mass;
+            this.mass = Mathf.Max(0f, mass);
             this.density = density;
             this.friction = friction;
             this.velocityTransfer = velocityTransfer;
@@ -76,6 +81,11 @@ namespace SandBXDSIM
             this.baseColor = baseColor;
             this.customColors = customColors;
 
+            // Powder Specific Properties
+            this.powderStackability = powderStackability;
+            this.powderStackability = Mathf.Clamp01(powderStackability);
+            this.inertialResistance = Mathf.Clamp01(inertialResistance);
+
             // Liquid Specific Properties
             this.viscosity = viscosity;
             this.vorticity = vorticity;
@@ -87,8 +97,8 @@ namespace SandBXDSIM
 
             this.airDrag = airDrag;
             this.airFlutter = airFlutter;
-            this.airInfluence = Mathf.Max(0f, airInfluence);
             this.airInfluence = airInfluence;
+            this.airInfluence = Mathf.Max(0f, airInfluence);
 
             this.liquidDrag = liquidDrag;
 

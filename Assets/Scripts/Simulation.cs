@@ -123,6 +123,7 @@ namespace SandBXDSIM
 
             world.Cells[idx] = world.MakeCell(element); // velocity starts at zero, asleep
             waker.WakeAround(x, y);                     // the new cell may fall; an erased cell lets its neighbours move
+            waker.WakeSlideReach(x, y, 1 + SimulationSettings.PowderMaxExtraStack);
             support.OnCellChanged(x, y, wasAnchored);   // anchored or free? did a neighbour just lose its support?
             world.Version++;
         }

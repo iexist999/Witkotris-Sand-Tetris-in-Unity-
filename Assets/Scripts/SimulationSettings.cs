@@ -46,6 +46,9 @@ public class SimulationSettings
     /// </summary>
     public static float PowderImpactTransferMultiplier = 1f;
 
+    /// <summary>How many extra cells a powder with powderFlowability 0 can hold on a ledge.</summary>
+    public static int PowderMaxExtraStack = 6;
+
 
     /// <summary>
     /// sideways speed at or below this counts as "not moving sideways" when a cell lands, so its

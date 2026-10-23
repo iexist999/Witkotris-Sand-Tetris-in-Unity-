@@ -52,6 +52,17 @@ namespace SandBXDSIM
             MarkAwake(x, y);
         }
 
+        /// <summary>Wakes the cells beside and above (x, y), up to maxDepth high: their slide check looks down into (x, y).</summary>
+        public void WakeSlideReach(int x, int y, int maxDepth)
+        {
+            int up = SimulationSettings.SimulationGravity.y <= 0f ? 1 : -1;
+            for (int k = 2; k <= maxDepth; k++) // k = 1 is already covered by WakeAround
+            {
+                Wake(x - 1, y + up * k);
+                Wake(x + 1, y + up * k);
+            }
+        }
+
         /// <summary>Wakes the cell at (x, y) and its 8 neighbours. Neighbours in other chunks / areas / zones wake those too.</summary>
         public void WakeAround(int x, int y)
         {

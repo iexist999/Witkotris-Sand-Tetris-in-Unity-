@@ -162,6 +162,7 @@ namespace SandBXDSIM
                     {
                         cells[idx].awake = false;
                         cells[idx].velocity = Vector2.zero;
+                        cells[idx].freeFalling = false;
                         continue;
                     }
 

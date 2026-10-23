@@ -181,7 +181,8 @@ namespace SandBXDSIM
             {
                 element = element,
                 shade = (byte)(Rand() % (uint)ElementDatabase.Get(element).shadeCount),
-                anchored = Behaviors[element] == ElementBehavior.SuperSolid // supersolids are fixed from the start
+                anchored = Behaviors[element] == ElementBehavior.SuperSolid,
+                freeFalling = true
             };
 
         /// Whole cells to move, with the fraction as a probability: 0.4 -> 1 cell on ~40% of steps.
