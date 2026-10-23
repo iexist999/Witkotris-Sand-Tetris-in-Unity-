@@ -52,6 +52,7 @@ namespace SandBXDSIM
                 if (mover.TrySlope(ref pos, dir, sy) || mover.TrySlope(ref pos, -dir, sy))
                 {
                     if (cells[pos.idx].velocity.x == 0f) cells[pos.idx].velocity.x = pos.x - before;
+                    mover.Disturb(pos.x, pos.y);
                     return;
                 }
 
@@ -76,6 +77,9 @@ namespace SandBXDSIM
 
             // ---- 3. friction (only acts while touching the ground) ----
             if (landed) forces.ApplyFriction(pos.idx);
+
+            // disturb uneven powder piles
+            if (pos.idx != idx) mover.Disturb(pos.x, pos.y);
         }
     }
 }
