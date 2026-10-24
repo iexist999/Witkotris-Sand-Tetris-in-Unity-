@@ -37,6 +37,7 @@ namespace SandBXDSIM
         public float vorticity;
         public float cohesion;
         public float surfaceTension;
+        public float adhesion;
 
         // === Other Properties
         //gravity
@@ -45,7 +46,7 @@ namespace SandBXDSIM
         public float airDrag;     // share of (velocity - air velocity) lost per step, 0..1. 0 = ignores air
         public float airFlutter;  // random sideways kick per step, cells/step
         public float airInfluence; // air influence multiplier
-        // liquid influence
+        //liquid influence
         public float liquidDrag; // influence of movement when inside liquid mediums
 
         // === Behavior
@@ -56,7 +57,7 @@ namespace SandBXDSIM
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
             /*Powder Specific Properties*/ float powderStackability, float inertialResistance,
-            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion, float surfaceTension,
+            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion, float surfaceTension, float adhesion,
             /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
             // Identity
@@ -91,6 +92,8 @@ namespace SandBXDSIM
             this.vorticity = vorticity;
             this.cohesion = cohesion;
             this.surfaceTension = surfaceTension;
+            this.surfaceTension = Mathf.Clamp01(surfaceTension);
+            this.adhesion = adhesion;
 
             // Other Properties
             this.gravityInfluence = gravityInfluence;

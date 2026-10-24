@@ -29,6 +29,11 @@ public class SimulationSettings
 
     public static float MassGravityInfluence = 0.2f;
 
+    public static bool SimulateSurfaceTension = true;
+    public static int SurfaceTensionReach = 8;
+    public static int SurfaceTensionPuddleSize = 24;
+    public static float SurfaceTensionSharpness = 2f;
+
     /// <summary>
     /// general velocity transfer multiplier for all elementtypes
     /// </summary>
