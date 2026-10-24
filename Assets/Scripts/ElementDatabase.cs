@@ -57,6 +57,15 @@ namespace SandBXDSIM
 
             // POWDERS ====================================================
 
+            // - Sawdust
+            Register(/*Identity*/new Element("sawdust", ElementType.Powder,
+                /*Physical Properties*/60f, 90, 0.06f, 0.02f, 0.02f,
+                /*Chemical Properties*/20f, 0.10f,
+                /*Appearance*/false, 3, new Color32(133, 106, 33, 255), null,
+                /*Powder Specific Properties*/1f, 0f,
+                /*Liquid Specific Properties*/1f, 0f, 0f, 0f, 0f, 0f,
+                /*Other Properties*/0.8f, 0.3f, 0.1f, 3f, 1.5f));
+
             // - Sand
             Register(/*Identity*/new Element("sand", ElementType.Powder,
                 /*Physical Properties*/100f, 150, 0.02f, 0.05f, 0.1f,
