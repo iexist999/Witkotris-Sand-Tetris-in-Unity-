@@ -19,10 +19,13 @@ namespace SandBXDSIM
     ///             reach, so scattered cells find each other and gather.
     ///   2. Stick: a cell stopped by a neighbour of its own liquid, while it is part of a puddle, stays there
     ///             instead of bouncing off.
-    ///   3. Hold:  a slow (1 cell/step) sideways step that would tear a cell off a puddle is cancelled.
+    ///   3. Hold:  a creep-speed sideways step that would tear a cell off a puddle is cancelled.
     ///
     /// Seek / stick / hold are rolled against the element's grip (<see cref="Grip"/>), and the biggest puddle is
     /// surfaceTension * SurfaceTensionPuddleSize cells long, so higher tension = more and bigger puddles.
+    ///
+    /// DISPERSION SPEED is Element.spreadSpeed: how many cells per step a resting liquid cell creeps sideways
+    /// (<see cref="CreepSpeed"/>). It does not change how strongly puddles hold (<see cref="HoldSpeed"/> scales with it).
     /// Only surfaceTension = 1 is a hard lock; those puddle cells can fall asleep (see <see cref="IsSettled"/>).
     /// </summary>
     internal sealed class LiquidBehavior : CellBehavior
@@ -89,15 +92,20 @@ namespace SandBXDSIM
             bool surface = IsSurface(pos.x, pos.y, down); // surface tension only looks at the top layer of a liquid body
 
             // at rest on the ground: thin liquids keep creeping sideways, thick ones only on some steps
-            // (a surface cell may pick its direction with SurfaceCreepDir instead of at random)
+            // (a surface cell may pick its direction with SurfaceCreepDir instead of at random).
+            // the creep itself runs at the element's spreadSpeed (cells/step): that is how fast it disperses.
             if (landed && Mathf.RoundToInt(cells[pos.idx].velocity.x) == 0 && !forces.FrictionRoll(pos.idx))
-                cells[pos.idx].velocity.x = surface ? SurfaceCreepDir(pos, dir, down) : dir;
+            {
+                int creepDir = surface ? SurfaceCreepDir(pos, dir, down) : dir;
+                cells[pos.idx].velocity.x = creepDir * CreepSpeed(cells[pos.idx].element);
+            }
 
             int dx = Mathf.RoundToInt(cells[pos.idx].velocity.x);
 
-            // surface tension, hold: a slow step that would tear the cell off its puddle is cancelled.
-            // anything faster than 1 cell/step has enough momentum to break free (splashes still splash).
-            if (surface && (dx == 1 || dx == -1) && TensionHolds(pos, dx, down))
+            // surface tension, hold: a creeping step that would tear the cell off its puddle is cancelled.
+            // anything faster than creep speed has enough momentum to break free (splashes still splash).
+            if (surface && dx != 0 && Mathf.Abs(cells[pos.idx].velocity.x) < HoldSpeed(cells[pos.idx].element)
+                && TensionHolds(pos, dx > 0 ? 1 : -1, down))
             {
                 cells[pos.idx].velocity.x = 0f;
                 dx = 0;
@@ -132,6 +140,16 @@ namespace SandBXDSIM
             float t = Mathf.Clamp01(ElementDatabase.Get(el).surfaceTension);
             return 1f - Mathf.Pow(1f - t, SimulationSettings.SurfaceTensionSharpness);
         }
+
+        /// <summary>Sideways speed of a resting liquid cell (cells/step). Element.spreadSpeed, never below 1.</summary>
+        float CreepSpeed(ushort el) => Mathf.Max(1f, ElementDatabase.Get(el).spreadSpeedMultiplier);
+
+        /// <summary>
+        /// Sideways speed below which surface tension can still hold a cell back: creep speed plus some slack.
+        /// Because it scales with spreadSpeed, faster dispersion does not let puddle cells escape their puddle.
+        /// (spreadSpeed 1 gives 1.5, the old "one cell per step" rule.)
+        /// </summary>
+        float HoldSpeed(ushort el) => 1.5f * CreepSpeed(el);
 
         /// <summary>Longest run (in cells) that still counts as a puddle for this element.</summary>
         int PuddleLimit(ushort el) =>
@@ -174,10 +192,12 @@ namespace SandBXDSIM
         /// "Puddle": the run of the same liquid on one row that contains (x, y), where
         ///   - the run is short: at most surfaceTension * SurfaceTensionPuddleSize cells,
         ///   - every cell of it is top layer (liquid below, nothing stacked on top),
-        ///   - and both ends are bounded by a free cell one layer lower (air with liquid below it).
-        /// So: a small clump lying on flat liquid. A slope or staircase never qualifies (one end is higher, or it
+        ///   - both ends are bounded by a free cell one layer lower (air with liquid below it),
+        ///   - and the surface stays level for SurfaceTensionFlatMargin cells beyond both ends (<see cref="IsLevelBeyond"/>).
+        /// So: a small clump lying on a flat liquid surface. A slope or staircase never qualifies (one end is higher, or it
         /// ends at a wall), neither does the top step of a hill against a wall, or a run with liquid stacked on
-        /// part of it. Those keep levelling exactly like they do without surface tension.
+        /// part of it, and neither does the top of a mound (the surface drops away right next to it). Those keep
+        /// levelling exactly like they do without surface tension.
         /// </summary>
         bool IsPuddle(ushort el, int x, int y, int down)
         {
@@ -191,7 +211,33 @@ namespace SandBXDSIM
             for (int i = left; i <= right; i++)
                 if (!IsTopLayer(i, y, down)) return false;
 
-            return IsLowerFlank(left - 1, y, down) && IsLowerFlank(right + 1, y, down);
+            return IsLowerFlank(left - 1, y, down) && IsLowerFlank(right + 1, y, down)
+                && IsLevelBeyond(left - 1, y, -1, down) && IsLevelBeyond(right + 1, y, 1, down);
+        }
+
+        /// <summary>
+        /// Walks SurfaceTensionFlatMargin cells away from a puddle end (starting past its flank cell) and checks that the
+        /// surface there is level: liquid at the puddle's base layer, nothing stacked above the puddle layer. A solid
+        /// or the world edge ends the walk and counts as level. Without this, the top plateau of a mound (and every layer
+        /// of it, as the mound wears down) looked like a puddle and was held in place, which slowed levelling a lot.
+        /// </summary>
+        bool IsLevelBeyond(int flankX, int y, int side, int down)
+        {
+            int baseRow = y + down, upRow = y - down;
+            int margin = SimulationSettings.SurfaceTensionFlatMargin;
+
+            for (int k = 1; k <= margin; k++)
+            {
+                int x = flankX + side * k;
+                if (!world.InBounds(x, y)) return true; // world edge
+
+                ElementBehavior here = world.Behaviors[cells[world.Index(x, y)].element];
+                if (here == ElementBehavior.Solid || here == ElementBehavior.SuperSolid) return true; // wall
+
+                if (world.Behaviors[cells[world.Index(x, baseRow)].element] != ElementBehavior.Liquid) return false; // surface drops here
+                if (!world.InBounds(x, upRow) || !IsFreeSpace(x, upRow)) return false;                                // stacked higher here
+            }
+            return true;
         }
 
         /// <summary>
@@ -234,9 +280,9 @@ namespace SandBXDSIM
         /// </summary>
         bool TensionLocks(int idx, int x, int y, int side, int down)
         {
-            if (Mathf.Abs(cells[idx].velocity.x) >= 1.5f) return false; // fast enough to tear free, Step only holds 1-cell steps
-
             ushort el = cells[idx].element;
+            if (Mathf.Abs(cells[idx].velocity.x) >= HoldSpeed(el)) return false; // fast enough to tear free, Step only holds creep-speed steps
+
             return Grip(el) >= 1f
                 && IsSurface(x, y, down)
                 && Detaches(el, x, y, side)

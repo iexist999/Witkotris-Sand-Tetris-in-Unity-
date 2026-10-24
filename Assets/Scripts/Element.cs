@@ -33,6 +33,7 @@ namespace SandBXDSIM
         public float inertialResistance;
 
         // === Liquid Specific Properties
+        public float spreadSpeedMultiplier; //use whole numbers
         public float viscosity;
         public float vorticity;
         public float cohesion;
@@ -57,7 +58,7 @@ namespace SandBXDSIM
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
             /*Powder Specific Properties*/ float powderStackability, float inertialResistance,
-            /*Liquid Specific Properties*/ float viscosity, float vorticity, float cohesion, float surfaceTension, float adhesion,
+            /*Liquid Specific Properties*/ float spreadSpeedMultiplier, float viscosity, float vorticity, float cohesion, float surfaceTension, float adhesion,
             /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
             // Identity
@@ -88,6 +89,8 @@ namespace SandBXDSIM
             this.inertialResistance = Mathf.Clamp01(inertialResistance);
 
             // Liquid Specific Properties
+            this.spreadSpeedMultiplier = spreadSpeedMultiplier;
+            this.spreadSpeedMultiplier = Mathf.Max(1f, spreadSpeedMultiplier);
             this.viscosity = viscosity;
             this.vorticity = vorticity;
             this.cohesion = cohesion;

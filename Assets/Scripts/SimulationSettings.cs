@@ -33,6 +33,8 @@ public class SimulationSettings
     public static int SurfaceTensionReach = 8;
     public static int SurfaceTensionPuddleSize = 24;
     public static float SurfaceTensionSharpness = 2f;
+    /// <summary>Cells past each end of a puddle where the surface must stay level for it to count as a puddle.</summary>
+    public static int SurfaceTensionFlatMargin = 12;
 
     /// <summary>
     /// general velocity transfer multiplier for all elementtypes
