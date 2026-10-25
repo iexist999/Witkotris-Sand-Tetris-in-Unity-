@@ -36,6 +36,11 @@ public class SimulationSettings
     /// <summary>Cells past each end of a puddle where the surface must stay level for it to count as a puddle.</summary>
     public static int SurfaceTensionFlatMargin = 12;
 
+    /// <summary>Sideways exit speed of a submerged liquid cell = scale * sqrt(2 * gravity * head). 0 = off.</summary>
+    public static float PressureFlowScale = 2f;
+    public static float PressureMaxSpeed = 6f;   // cells/step cap
+    public static int PressureMaxHead = 64;      // how many cells above are counted
+
     /// <summary>
     /// general velocity transfer multiplier for all elementtypes
     /// </summary>

@@ -24,9 +24,22 @@ namespace SandBXDSIM
     /// Seek / stick / hold are rolled against the element's grip (<see cref="Grip"/>), and the biggest puddle is
     /// surfaceTension * SurfaceTensionPuddleSize cells long, so higher tension = more and bigger puddles.
     ///
-    /// DISPERSION SPEED is Element.spreadSpeed: how many cells per step a resting liquid cell creeps sideways
-    /// (<see cref="CreepSpeed"/>). It does not change how strongly puddles hold (<see cref="HoldSpeed"/> scales with it).
     /// Only surfaceTension = 1 is a hard lock; those puddle cells can fall asleep (see <see cref="IsSettled"/>).
+    ///
+    /// DISPERSION vs STREAMS. Sideways motion comes in two kinds, handled separately so one does not fake the other:
+    ///
+    ///   - Levelling (nothing liquid above the cell): the cell remembers a direction (velocity.x = +-1) but while it
+    ///     travels along a surface or the ground it covers Element.spreadSpeed cells per step as DISPLACEMENT
+    ///     (<see cref="SpreadsAlong"/>). Its velocity stays 1, so if it leaves the surface (a hole, an edge) it does not
+    ///     carry spreadSpeed into the air.
+    ///   - Pressure (liquid above the cell): a submerged cell that gets room to move leaves at
+    ///     PressureFlowScale * sqrt(2 * gravity * head), where head = liquid cells stacked above it, i.e. the speed of
+    ///     a cell that fell through that height. A hole just under the surface gives a trickle, a deep one a jet
+    ///     (<see cref="StartCreep"/>).
+    ///
+    /// A cell that is merely resting re-lands every other step (gravity rounds to 0 cells on alternate steps) with the
+    /// impact of two gravity steps. That is not a real impact, so it transfers no sideways speed (<see cref="RestImpact"/>);
+    /// before this gate every landing pumped speed into cells sliding along a surface and they accelerated without limit.
     /// </summary>
     internal sealed class LiquidBehavior : CellBehavior
     {
@@ -83,35 +96,37 @@ namespace SandBXDSIM
                     SimulationSettings.LiquidImpactTransferMultiplier *
                     SimulationSettings.ImpactTransferMultiplier;
 
-                // flat ground: part of the fall speed becomes sideways speed
-                forces.TransferImpact(pos.idx, impact, dir, transfer);
+                // flat ground: part of the fall speed becomes sideways speed. a cell that is only resting does not
+                // count (see RestImpact): without this gate cells sliding along a surface speed up every other step
+                if (impact > RestImpact(cells[pos.idx].element))
+                    forces.TransferImpact(pos.idx, impact, dir, transfer);
             }
 
             // --- horizontal axis ---
             int down = DownOf(pos.idx);
             bool surface = IsSurface(pos.x, pos.y, down); // surface tension only looks at the top layer of a liquid body
 
-            // at rest on the ground: thin liquids keep creeping sideways, thick ones only on some steps
-            // (a surface cell may pick its direction with SurfaceCreepDir instead of at random).
-            // the creep itself runs at the element's spreadSpeed (cells/step): that is how fast it disperses.
+            // at rest on the ground: thin liquids keep creeping sideways, thick ones only on some steps.
+            // StartCreep decides direction and speed: heading +-1 for a levelling cell, pressure speed for a submerged one
             if (landed && Mathf.RoundToInt(cells[pos.idx].velocity.x) == 0 && !forces.FrictionRoll(pos.idx))
-            {
-                int creepDir = surface ? SurfaceCreepDir(pos, dir, down) : dir;
-                cells[pos.idx].velocity.x = creepDir * CreepSpeed(cells[pos.idx].element);
-            }
+                StartCreep(pos, dir, surface, down);
 
             int dx = Mathf.RoundToInt(cells[pos.idx].velocity.x);
 
             // surface tension, hold: a creeping step that would tear the cell off its puddle is cancelled.
             // anything faster than creep speed has enough momentum to break free (splashes still splash).
-            if (surface && dx != 0 && Mathf.Abs(cells[pos.idx].velocity.x) < HoldSpeed(cells[pos.idx].element)
+            if (surface && dx != 0 && Mathf.Abs(cells[pos.idx].velocity.x) < HoldSpeed
                 && TensionHolds(pos, dx > 0 ? 1 : -1, down))
             {
                 cells[pos.idx].velocity.x = 0f;
                 dx = 0;
             }
 
-            if (dx != 0 && !mover.MoveAxis(ref pos, dx, 0))
+            // spreadSpeed: along a surface or the ground the cell covers several cells per step, but its velocity stays dx
+            int move = dx;
+            if (dx != 0 && SpreadsAlong(pos, down)) move = dx * SpreadCells(cells[pos.idx].element);
+
+            if (dx != 0 && !mover.MoveAxis(ref pos, move, 0))
             {
                 // hit a wall or a denser neighbour: bounce. but if it was its own liquid, in a puddle, and surface
                 // tension wins the roll, the two stick together instead
@@ -141,15 +156,76 @@ namespace SandBXDSIM
             return 1f - Mathf.Pow(1f - t, SimulationSettings.SurfaceTensionSharpness);
         }
 
-        /// <summary>Sideways speed of a resting liquid cell (cells/step). Element.spreadSpeed, never below 1.</summary>
-        float CreepSpeed(ushort el) => Mathf.Max(1f, ElementDatabase.Get(el).spreadSpeedMultiplier);
+        // ---------------------------------------------------------------
+        // DISPERSION AND PRESSURE
+        // ---------------------------------------------------------------
+
+        /// <summary>Sideways speed below which surface tension can still hold a cell back. Creep heading is 1, so this is 1 plus slack.</summary>
+        const float HoldSpeed = 1.5f;
+
+        /// <summary>Cells per step a levelling cell covers along a surface or the ground. Element.spreadSpeed rounded, never below 1.</summary>
+        int SpreadCells(ushort el) => Mathf.Max(1, Mathf.RoundToInt(ElementDatabase.Get(el).spreadSpeedMultiplier));
 
         /// <summary>
-        /// Sideways speed below which surface tension can still hold a cell back: creep speed plus some slack.
-        /// Because it scales with spreadSpeed, faster dispersion does not let puddle cells escape their puddle.
-        /// (spreadSpeed 1 gives 1.5, the old "one cell per step" rule.)
+        /// Impact speed of a cell that is only resting: it re-lands every other step after two steps of gravity.
+        /// Landings at or below this (with a little slack) are not impacts and transfer no sideways speed.
         /// </summary>
-        float HoldSpeed(ushort el) => 1.5f * CreepSpeed(el);
+        float RestImpact(ushort el) =>
+            2f * Mathf.Abs(SimulationSettings.SimulationGravity.y) * SimulationSettings.SimulationGravityFactor *
+            ElementDatabase.GravityScale(el) * 1.05f;
+
+        /// <summary>
+        /// True while the cell travels along something: nothing liquid directly above it (so it is not under pressure)
+        /// and something it cannot fall into directly below it (liquid, ground, a wall). In free fall it is false.
+        /// </summary>
+        bool SpreadsAlong(CellPos pos, int down)
+        {
+            if (down == 0) return false;
+
+            int above = pos.y - down;
+            if (world.InBounds(pos.x, above) && world.Behaviors[cells[world.Index(pos.x, above)].element] == ElementBehavior.Liquid)
+                return false;
+
+            return !world.CanEnter(pos.idx, pos.x, pos.y + down);
+        }
+
+        /// <summary>Liquid cells stacked directly above (x, y), up to PressureMaxHead. This is the pressure head on the cell.</summary>
+        int HeadAbove(int x, int y, int down)
+        {
+            int up = -down, head = 0, max = SimulationSettings.PressureMaxHead;
+            for (int yy = y + up; head < max && world.InBounds(x, yy); yy += up)
+            {
+                if (world.Behaviors[cells[world.Index(x, yy)].element] != ElementBehavior.Liquid) break;
+                head++;
+            }
+            return head;
+        }
+
+        /// <summary>
+        /// A resting cell starts creeping sideways.
+        ///   - liquid above it (submerged): pressure outflow. speed = PressureFlowScale * sqrt(2 * g * head), rounded
+        ///     stochastically so low heads give a slow trickle instead of nothing. Direction is random; a cell facing
+        ///     the wrong way bounces off and leaves next step.
+        ///   - nothing liquid above (levelling): heading +-1, and a loose puddle cell picks the direction of the nearest
+        ///     puddle (SurfaceCreepDir). SpreadsAlong turns the heading into spreadSpeed cells per step.
+        /// </summary>
+        void StartCreep(CellPos pos, int randomDir, bool surface, int down)
+        {
+            ushort el = cells[pos.idx].element;
+
+            int head = down == 0 ? 0 : HeadAbove(pos.x, pos.y, down);
+            if (head > 0 && SimulationSettings.PressureFlowScale > 0f)
+            {
+                float g = Mathf.Abs(SimulationSettings.SimulationGravity.y) * SimulationSettings.SimulationGravityFactor *
+                          ElementDatabase.GravityScale(el);
+                float speed = Mathf.Min(SimulationSettings.PressureMaxSpeed,
+                                        SimulationSettings.PressureFlowScale * Mathf.Sqrt(2f * g * head));
+                cells[pos.idx].velocity.x = randomDir * world.RoundStochastic(speed);
+                return;
+            }
+
+            cells[pos.idx].velocity.x = surface ? SurfaceCreepDir(pos, randomDir, down) : randomDir;
+        }
 
         /// <summary>Longest run (in cells) that still counts as a puddle for this element.</summary>
         int PuddleLimit(ushort el) =>
@@ -281,7 +357,7 @@ namespace SandBXDSIM
         bool TensionLocks(int idx, int x, int y, int side, int down)
         {
             ushort el = cells[idx].element;
-            if (Mathf.Abs(cells[idx].velocity.x) >= HoldSpeed(el)) return false; // fast enough to tear free, Step only holds creep-speed steps
+            if (Mathf.Abs(cells[idx].velocity.x) >= HoldSpeed) return false; // fast enough to tear free, Step only holds creep-speed steps
 
             return Grip(el) >= 1f
                 && IsSurface(x, y, down)
