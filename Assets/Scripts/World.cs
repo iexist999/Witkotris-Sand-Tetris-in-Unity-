@@ -155,16 +155,41 @@ namespace SandBXDSIM
 
         public int Index(int x, int y) => y * Width + x;
 
-        /// <summary>A cell may enter a spot if whatever is there is less dense than the mover. This is what makes heavy things sink.</summary>
+        /// <summary>
+        /// Can the cell enter (tx, ty) with the speed it has right now? Used by IsSettled / slope checks.
+        /// A resting cell has speed 0, so it can't push into a resistant powder: that is the "stopper".
+        /// </summary>
         public bool CanEnter(int from, int tx, int ty)
         {
-            if (!InBounds(tx, ty)) return false;
+            float cost = EntryCost(from, tx, ty);
+            if (cost < 0f) return false;
+            return cost == 0f || Cells[from].velocity.magnitude >= cost; // sqrt only when a resistant cell is involved
+        }
+
+        /// <summary>
+        /// Cost (cells/step of speed) of entering (tx, ty). -1 = can't enter at all (outside, anchored, or not denser
+        /// than what is there), 0 = free.
+        /// </summary>
+        float EntryCost(int from, int tx, int ty)
+        {
+            if (!InBounds(tx, ty)) return -1f;
 
             ref readonly Cell target = ref Cells[ty * Width + tx];
-            if (target.anchored) return false; // fixed in place: no density is high enough to push it out
+            if (target.anchored) return -1f;
 
-            return ElementDatabase.Get(target.element).density
-                 < ElementDatabase.Get(Cells[from].element).density;
+            ushort mover = Cells[from].element;
+            if (ElementDatabase.Get(target.element).density >= ElementDatabase.Get(mover).density) return -1f;
+
+            return ElementDatabase.PenetrationCost(mover, target.element);
+        }
+
+        /// <summary>Path check for moves: enters if the remaining budget covers the cost, and spends it.</summary>
+        public bool TryEnter(int from, int tx, int ty, ref float budget)
+        {
+            float cost = EntryCost(from, tx, ty);
+            if (cost < 0f || cost > budget) return false;
+            budget -= cost;
+            return true;
         }
 
         /// <summary>Swaps two cells and stamps both as handled this step. The velocity travels with the cell.</summary>

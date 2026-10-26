@@ -31,6 +31,7 @@ namespace SandBXDSIM
         // === Powder Specific Properties
         public float powderStackability;
         public float inertialResistance;
+        public float densityInfluence;
 
         // === Liquid Specific Properties
         public float spreadSpeedMultiplier; //use whole numbers
@@ -57,7 +58,7 @@ namespace SandBXDSIM
             /*Physical Properties*/float mass, byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
-            /*Powder Specific Properties*/ float powderStackability, float inertialResistance,
+            /*Powder Specific Properties*/ float powderStackability, float inertialResistance, float densityInfluence,
             /*Liquid Specific Properties*/ float spreadSpeedMultiplier, float viscosity, float vorticity, float cohesion, float surfaceTension, float adhesion,
             /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
@@ -87,6 +88,8 @@ namespace SandBXDSIM
             this.powderStackability = powderStackability;
             this.powderStackability = Mathf.Clamp01(powderStackability);
             this.inertialResistance = Mathf.Clamp01(inertialResistance);
+            this.densityInfluence = densityInfluence;
+            this.densityInfluence = Mathf.Clamp01(densityInfluence);
 
             // Liquid Specific Properties
             this.spreadSpeedMultiplier = spreadSpeedMultiplier;

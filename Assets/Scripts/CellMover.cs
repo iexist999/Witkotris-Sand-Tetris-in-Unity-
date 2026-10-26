@@ -38,17 +38,21 @@ namespace SandBXDSIM
         }
 
         /// <summary>
-        /// moves along one axis as far as the path is clear.
-        /// updates pos and returns true if the full distance was travelled.
-        /// </summary>b
+        /// Moves along one axis as far as the path is clear AND the mover's speed can pay for it
+        /// (see Element.densityInfluence). Updates pos and returns true if the full distance was travelled.
+        /// </summary>
         public bool MoveAxis(ref CellPos pos, int dx, int dy)
         {
             int steps = Mathf.Abs(dx) + Mathf.Abs(dy);
             int sx = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
             int sy = dy > 0 ? 1 : (dy < 0 ? -1 : 0);
 
+            // speed along the move = the push it can spend on resistant cells
+            float start = dx != 0 ? Mathf.Abs(cells[pos.idx].velocity.x) : Mathf.Abs(cells[pos.idx].velocity.y);
+            float budget = start;
+
             int free = 0;
-            while (free < steps && world.CanEnter(pos.idx, pos.x + sx * (free + 1), pos.y + sy * (free + 1)))
+            while (free < steps && world.TryEnter(pos.idx, pos.x + sx * (free + 1), pos.y + sy * (free + 1), ref budget))
                 free++;
 
             if (free > 0)
@@ -57,6 +61,14 @@ namespace SandBXDSIM
                 pos.x += sx * free;
                 pos.y += sy * free;
                 pos.idx = MoveTo(pos.idx, fromX, fromY, pos.x, pos.y);
+
+                // what was spent pushing through resistant cells is gone from the mover's speed
+                if (budget < start)
+                {
+                    ref Cell c = ref cells[pos.idx];
+                    if (dx != 0) c.velocity.x = Mathf.Sign(c.velocity.x) * budget;
+                    else c.velocity.y = Mathf.Sign(c.velocity.y) * budget;
+                }
             }
             return free == steps;
         }

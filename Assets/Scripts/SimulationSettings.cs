@@ -42,6 +42,12 @@ public class SimulationSettings
     public static int PressureMaxHead = 64;      // how many cells above are counted
 
     /// <summary>
+    /// Global strength of densityInfluence. Cost per cell entered (in cells/step of speed) =
+    /// densityInfluence * DensityInfluenceScale * (targetDensity / moverDensity).
+    /// </summary>
+    public static float DensityInfluenceScale = 2f;
+
+    /// <summary>
     /// general velocity transfer multiplier for all elementtypes
     /// </summary>
     public static float ImpactTransferMultiplier = 1f;
