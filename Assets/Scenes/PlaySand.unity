@@ -253,7 +253,7 @@ MonoBehaviour:
   simulation: {fileID: 322835530}
   view: {fileID: 322835532}
   brushElement: sand
-  brushRadius: 4
+  brushRadius: 6
   windStrength: 0.1
   windMaxSwipe: 12
   windRadius: 4

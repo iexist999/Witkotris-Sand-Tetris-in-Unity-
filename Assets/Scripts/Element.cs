@@ -31,7 +31,8 @@ namespace SandBXDSIM
         // === Powder Specific Properties
         public float powderStackability;
         public float inertialResistance;
-        public float densityInfluence;
+        public float densityStoppingInfluence;
+        public float densityImpactInfluence;
 
         // === Liquid Specific Properties
         public float spreadSpeedMultiplier; //use whole numbers
@@ -58,7 +59,7 @@ namespace SandBXDSIM
             /*Physical Properties*/float mass, byte density, float friction, float velocityTransfer, float velocityTransferDeviation,
             /*Chemical Properties*/float temperature, float thermalConductivity,
             /*Appearance*/bool customColor, byte shadeCount, Color32 baseColor, Color32[] customColors,
-            /*Powder Specific Properties*/ float powderStackability, float inertialResistance, float densityInfluence,
+            /*Powder Specific Properties*/ float powderStackability, float inertialResistance, float densityStoppingInfluence, float densityImpactInfluence,
             /*Liquid Specific Properties*/ float spreadSpeedMultiplier, float viscosity, float vorticity, float cohesion, float surfaceTension, float adhesion,
             /*Other*/float gravityInfluence, float airDrag, float airFlutter, float airInfluence, float liquidDrag)
         {
@@ -88,8 +89,10 @@ namespace SandBXDSIM
             this.powderStackability = powderStackability;
             this.powderStackability = Mathf.Clamp01(powderStackability);
             this.inertialResistance = Mathf.Clamp01(inertialResistance);
-            this.densityInfluence = densityInfluence;
-            this.densityInfluence = Mathf.Clamp01(densityInfluence);
+            this.densityStoppingInfluence = densityStoppingInfluence;
+            this.densityStoppingInfluence = Mathf.Clamp01(densityStoppingInfluence);
+            this.densityImpactInfluence = densityImpactInfluence;
+            this.densityImpactInfluence = Mathf.Max(0f, densityImpactInfluence);
 
             // Liquid Specific Properties
             this.spreadSpeedMultiplier = spreadSpeedMultiplier;

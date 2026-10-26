@@ -42,10 +42,17 @@ public class SimulationSettings
     public static int PressureMaxHead = 64;      // how many cells above are counted
 
     /// <summary>
-    /// Global strength of densityInfluence. Cost per cell entered (in cells/step of speed) =
-    /// densityInfluence * DensityInfluenceScale * (targetDensity / moverDensity).
+    /// Strength of densityStoppingInfluence. Cost per cell entered =
+    /// stopping * DensityStoppingScale * (targetDensity / moverDensity) / mover.densityImpactInfluence
     /// </summary>
-    public static float DensityInfluenceScale = 2f;
+    public static float DensityStoppingScale = 2f;
+
+    /// <summary>
+    /// How much the mover's speed counts: power = speed ^ exponent. 1 = linear (depth ~ sqrt(drop height)),
+    /// 2 = kinetic energy (depth ~ drop height). Cost is in the same units, so retune DensityStoppingScale
+    /// when you change this (with 2, start around 0.5-1).
+    /// </summary>
+    public static float DensityImpactSpeedExponent = 1f;
 
     /// <summary>
     /// general velocity transfer multiplier for all elementtypes

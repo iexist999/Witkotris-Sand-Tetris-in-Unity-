@@ -26,9 +26,24 @@ namespace SandBXDSIM
 
             ref Cell c = ref cells[idx];
             float scale = ElementDatabase.GravityScale(c.element);
+            Vector2 g = SimulationSettings.SimulationGravity * SimulationSettings.SimulationGravityFactor * scale;
 
-            // e.g. (0, -9.81) * 0.05 * 1.0 = (0, -0.49) added to the velocity every step
-            c.velocity += SimulationSettings.SimulationGravity * SimulationSettings.SimulationGravityFactor * scale;
+            // A resistant powder directly below carries the weight: no new speed, so the penetration depth comes purely
+            // from the impact. Speed under half a cell/step can't pay for a whole cell any more (it would also never
+            // round to a move), so it is dropped and the mover can fall asleep.
+            if (g.y != 0f && c.velocity.y * g.y >= 0f && PushingIntoResistance(idx, g.y < 0f ? -1 : 1))
+            {
+                g.y = 0f;
+                if (Mathf.Abs(c.velocity.y) < 0.5f) c.velocity.y = 0f;
+            }
+
+            c.velocity += g;
+        }
+
+        bool PushingIntoResistance(int idx, int dirY)
+        {
+            int below = idx + dirY * world.Width; // same column, one row toward gravity
+            return (uint)below < (uint)cells.Length && world.EntryCostAt(idx, below) > 0f;
         }
 
         /// <summary>Caps both velocity axes at SimulationSettings.SimulationMaxVelocity. Call after the forces, before moving.</summary>

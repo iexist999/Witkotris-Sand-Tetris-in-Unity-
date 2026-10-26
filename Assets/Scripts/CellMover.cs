@@ -47,8 +47,9 @@ namespace SandBXDSIM
             int sx = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
             int sy = dy > 0 ? 1 : (dy < 0 ? -1 : 0);
 
-            // speed along the move = the push it can spend on resistant cells
-            float start = dx != 0 ? Mathf.Abs(cells[pos.idx].velocity.x) : Mathf.Abs(cells[pos.idx].velocity.y);
+            // power along this move; resistant cells charge part of it per cell entered
+            float speed = dx != 0 ? Mathf.Abs(cells[pos.idx].velocity.x) : Mathf.Abs(cells[pos.idx].velocity.y);
+            float start = ElementDatabase.ImpactPower(speed);
             float budget = start;
 
             int free = 0;
@@ -62,12 +63,13 @@ namespace SandBXDSIM
                 pos.y += sy * free;
                 pos.idx = MoveTo(pos.idx, fromX, fromY, pos.x, pos.y);
 
-                // what was spent pushing through resistant cells is gone from the mover's speed
+                // what was spent on resistant cells is gone from the mover's speed
                 if (budget < start)
                 {
+                    float left = ElementDatabase.SpeedFromPower(budget);
                     ref Cell c = ref cells[pos.idx];
-                    if (dx != 0) c.velocity.x = Mathf.Sign(c.velocity.x) * budget;
-                    else c.velocity.y = Mathf.Sign(c.velocity.y) * budget;
+                    if (dx != 0) c.velocity.x = Mathf.Sign(c.velocity.x) * left;
+                    else c.velocity.y = Mathf.Sign(c.velocity.y) * left;
                 }
             }
             return free == steps;
