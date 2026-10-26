@@ -15,7 +15,7 @@ public class SimulationSettings
     /// =================================
     /// SIMULATION PHYSICS SETTINGS
     /// =================================
-    
+
     public static Vector2 SimulationGravity = new Vector2(0, -9.81f);
     public static float SimulationGravityFactor = 0.05f; // -9.81f * 0.05f = -0.49f added to velocity.y per step
 
@@ -72,6 +72,44 @@ public class SimulationSettings
     /// should solid materials get held up by diagonal connection with anchored neighboring cells
     /// </summary>
     public static bool SolidSupportDiagonals = false;
+
+    /// =================================
+    /// FREE STONE STACKS (Solid cells that are NOT anchored, see SolidBehavior)
+    /// Anchored stones are never affected. Stone gravity per step = 9.81 * SimulationGravityFactor * gravityInfluence (0.25)
+    /// = ~0.12 cells/step^2, so a stone falling h cells lands at about 0.5 * sqrt(h) cells/step
+    /// (9 cells = 1.5, 25 cells = 2.5, 100 cells = 5).
+    /// =================================
+
+    /// <summary>
+    /// how tall a stack of free stones can be per cell of width. The stones above a row may not exceed
+    /// ratio * (width of that row): at 3 a 1 wide tower holds 3 stones, 2 wide holds 6, 3 wide 9...
+    /// Rows that widen as they go down (a pyramid) are never a problem. Anything above the limit tips over.
+    /// </summary>
+    public static float SolidStackRatio = 3f;
+
+    /// <summary>
+    /// landing speed (cells/step) up to which a stone settles quietly. Keep it above ~1: a stone that is merely
+    /// resting re-lands now and then with the speed of a few gravity steps, and that must not count as a hit.
+    /// </summary>
+    public static float SolidSafeImpact = 1.5f;
+
+    /// <summary>landing speed at which a hit is as hard as it gets: collapse chance 1, stack keeps the least stability.</summary>
+    public static float SolidFullImpact = 5f;
+
+    /// <summary>how much of its normal limit a stack keeps at full impact (0.25 = a quarter, so a 1 wide tower holds 1)</summary>
+    public static float SolidShockStability = 0.25f;
+
+    /// <summary>
+    /// most of the stack a hit can bring down (0.5 = up to half of it, in stones). The real amount is between half
+    /// of that and all of it, and never more than what the shock made unstable.
+    /// </summary>
+    public static float SolidCollapseFraction = 0.5f;
+
+    /// <summary>sideways speed (cells/step) of the top stone of a stack that merely got too tall. Lower stones get less.</summary>
+    public static int SolidTipSpeed = 1;
+
+    /// <summary>same for a stack that was hit at full impact. Speed drops by 1 cell/step every step, so 2 slides 3 cells, 4 slides 10.</summary>
+    public static int SolidCollapseSpeed = 1;
 
     // air simulation settings
     //public static float WindDiffusion = 0.25f; // 0..1, keep it at or below ~0.5

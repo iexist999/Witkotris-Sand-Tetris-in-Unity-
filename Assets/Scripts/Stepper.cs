@@ -40,7 +40,7 @@ namespace SandBXDSIM
 
             powder = new PowderBehavior(world, forces, mover, flowSystem);
             liquid = new LiquidBehavior(world, forces, mover);
-            solid = new SolidBehavior(world, forces, mover, support);
+            solid = new SolidBehavior(world, forces, mover, support, waker);
             ash = new AshBehavior(world, forces, mover, flowSystem);
         }
 
