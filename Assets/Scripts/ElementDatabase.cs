@@ -16,6 +16,9 @@ namespace SandBXDSIM
         static Element[] elements = new Element[16];
         static int count;
 
+        static Color32[] shadeColors;
+        static int shadeStride;
+
         public static int Count => count;
 
         public static ref readonly Element Get(ushort id) => ref elements[id];
@@ -125,6 +128,51 @@ namespace SandBXDSIM
                 /*Powder Specific Properties*/1f, 0f, 0f, 1f,
                 /*Liquid Specific Properties*/1f, 0f, 0f, 0f, 0f, 0f,
                 /*Other Properties*/0f, 0.3f, 0.1f, 5f, 1f));
+
+            BuildShadeColors();
+        }
+
+        // Moved here from SimulationRenderer.BuildPalette
+        static void BuildShadeColors()
+        {
+            shadeStride = 1;
+            for (int id = 0; id < count; id++)
+                shadeStride = Mathf.Max(shadeStride, elements[id].shadeCount);
+
+            shadeColors = new Color32[count * shadeStride];
+            for (int id = 0; id < count; id++)
+            {
+                ref readonly Element def = ref elements[id];
+
+                for (int s = 0; s < def.shadeCount; s++)
+                {
+                    if (def.customColor && def.customColors != null && def.customColors.Length > 0)
+                    {
+                        shadeColors[id * shadeStride + s] = def.customColors[Mathf.Min(s, def.customColors.Length - 1)];
+                        continue;
+                    }
+
+                    float f = 1f - s * 0.04f;
+                    Color32 c = def.baseColor;
+                    shadeColors[id * shadeStride + s] = new Color32((byte)(c.r * f), (byte)(c.g * f), (byte)(c.b * f), c.a);
+                }
+            }
+        }
+
+        /// <summary>A fresh color for a new cell of this element: one of its shades, picked by `random`.</summary>
+        public static Color32 RollColor(ushort id, uint random) =>
+            shadeColors[id * shadeStride + (int)(random % (uint)elements[id].shadeCount)];
+
+        /// <summary>True if the color is one of the shades this element is born with (alpha ignored).</summary>
+        public static bool IsNaturalColor(ushort id, Color32 color)
+        {
+            int start = id * shadeStride, n = elements[id].shadeCount;
+            for (int s = 0; s < n; s++)
+            {
+                Color32 c = shadeColors[start + s];
+                if (c.r == color.r && c.g == color.g && c.b == color.b) return true;
+            }
+            return false;
         }
 
         // helpers

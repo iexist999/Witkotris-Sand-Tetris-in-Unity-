@@ -15,8 +15,10 @@ namespace SandBXDSIM
 
         Texture2D tex;
         Color32[] palette;
+        float[] shadeFactor;
         int shadeStride;
         int renderedVersion = -1;
+        int renderedColorVersion = -1;
 
         // ---------------------------------------------------------------
         // SETUP
@@ -42,6 +44,11 @@ namespace SandBXDSIM
             shadeStride = 1;
             for (int id = 0; id < count; id++)
                 shadeStride = Mathf.Max(shadeStride, ElementDatabase.Get((ushort)id).shadeCount);
+
+            // NEW: same darkening the palette uses, so painted cells keep their grain
+            shadeFactor = new float[shadeStride];
+            for (int s = 0; s < shadeStride; s++)
+                shadeFactor[s] = 1f - s * 0.04f;
 
             // palette is indexed by [elementId * shadeStride + shade]
             palette = new Color32[count * shadeStride];
@@ -84,7 +91,8 @@ namespace SandBXDSIM
         // LateUpdate so we always draw after the simulation / input have updated this frame.
         void LateUpdate()
         {
-            if (simulation.Version != renderedVersion) Render();
+            //if (simulation.Version != renderedVersion) Render();
+            if (simulation.Version != renderedVersion || simulation.ColorVersion != renderedColorVersion) Render();
         }
 
         void Render()
@@ -93,10 +101,11 @@ namespace SandBXDSIM
             var cells = simulation.Cells;
 
             for (int i = 0; i < cells.Length; i++)
-                raw[i] = palette[cells[i].element * shadeStride + cells[i].shade];
+                raw[i] = cells[i].color;
 
             tex.Apply(false);
             renderedVersion = simulation.Version;
+            renderedColorVersion = simulation.ColorVersion;
         }
 
         void OnDestroy()

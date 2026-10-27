@@ -8,8 +8,6 @@ namespace SandBXDSIM
         /// element index lookup into elementdatabase.
         /// </summary>
         public ushort element;
-        /// <summary>color shade index</summary>
-        public byte shade;
         /// <summary>
         /// last step that mofified this cell. prevents double moves in one step.
         /// </summary>
@@ -22,10 +20,7 @@ namespace SandBXDSIM
         /// (varies by element type)</summary>
         public bool freeFalling;
 
-        /// <summary>
-        /// per-cell paint color. alpha dictates whether it gets used by the renderer. a=0=(not used)
-        /// </summary>
-        public Color32 paint;
+        public Color32 color;
 
         /// <summary>
         /// does this cell act as an world anchor for other connected cells
