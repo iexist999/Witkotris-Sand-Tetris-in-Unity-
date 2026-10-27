@@ -9,20 +9,18 @@ namespace SandBXDSIM
         /// </summary>
         public ushort element;
         /// <summary>
-        /// color shade index.
-        /// </summary>
-        public byte shade;
-        /// <summary>
         /// last step that mofified this cell. prevents double moves in one step.
         /// </summary>
         public byte stamp;
-        /// <summary>
-        /// cell velocity.
-        /// </summary>
+        /// <summary>velocity of this cell</summary>
         public Vector2 velocity;
 
-        /// <summary>True while a powder is moving or was just shaken loose. Resting powders only look straight down.</summary>
+        /// <summary>whether this cell is actively moving/falling.
+        /// if false, certain calculations per step are limited to save resources.
+        /// (varies by element type)</summary>
         public bool freeFalling;
+
+        public Color32 color;
 
         /// <summary>
         /// does this cell act as an world anchor for other connected cells

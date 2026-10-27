@@ -28,6 +28,8 @@ namespace SandBXDSIM
 
         /// increments whenever the grid changes; the renderer redraws when it differs from what it last drew
         public int Version;
+        /// increments when a cell's color is edited without anything moving (paint, dye, burn). Only the renderer cares.
+        public int ColorVersion;
 
         /// counts steps (wraps, never 0). Cell.stamp == StepId means "already handled this step"
         public byte StepId;
@@ -201,7 +203,7 @@ namespace SandBXDSIM
             new Cell
             {
                 element = element,
-                shade = (byte)(Rand() % (uint)ElementDatabase.Get(element).shadeCount),
+                color = ElementDatabase.RollColor(element, Rand()),   // CHANGED (was shade)
                 anchored = Behaviors[element] == ElementBehavior.SuperSolid,
                 freeFalling = true
             };

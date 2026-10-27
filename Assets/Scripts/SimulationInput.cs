@@ -8,10 +8,18 @@ namespace SandBXDSIM
         [SerializeField] Simulation simulation;
         [SerializeField] SimulationRenderer view; // used for world -> cell conversion
 
-        [Header("Drawing")]
+        [Header("Drawing (LMB-draw) (RMB-erase)")]
         [Tooltip("Name of the element to paint (e.g. Sand, Water). Number keys 1-9 pick the first nine non-Atmosphere elements.")]
         public string brushElement = "sand";
         [Range(0, 10)] public int brushRadius = 0;
+
+        [Header("Painting (M5-add paint) (M4-clear paint)")]
+        public Color paintColor = Color.red;
+        [Tooltip("if true, only applies hue and saturation.")]
+        public bool keepBrightness = false;
+
+        const int AddPaintButton = 4;  // Mouse5
+        const int CleanPaintButton = 3;  // Mouse4
 
         [Header("Wind (hold middle mouse and drag)")]
         [Tooltip("Wind added per cell of mouse travel in one frame. Raise for a stronger blow.")]
@@ -50,6 +58,7 @@ namespace SandBXDSIM
             if (brushElement != resolvedName) ResolveBrush(); // inspector edit at runtime
             HandleHotkeys();
             HandleDrawing();
+            HandlePaint();
             HandleWind();
         }
 
@@ -111,6 +120,33 @@ namespace SandBXDSIM
                 }
             }
         }
+
+        void HandlePaint()
+        {
+            bool paint = Input.GetMouseButton(AddPaintButton);
+            bool clean = Input.GetMouseButton(CleanPaintButton);
+            if (!paint && !clean) return;
+
+            Color32 color = paintColor; // alpha is ignored, the cell's own alpha is kept
+
+            Vector3 world = cam.ScreenToWorldPoint(Input.mousePosition);
+            Vector2Int center = view.WorldToCell(world);
+
+            for (int dy = -brushRadius; dy <= brushRadius; dy++)
+            {
+                for (int dx = -brushRadius; dx <= brushRadius; dx++)
+                {
+                    if (dx * dx + dy * dy > brushRadius * brushRadius) continue;
+
+                    int x = center.x + dx, y = center.y + dy;
+
+                    if (clean) simulation.CleanCell(x, y);
+                    else if (keepBrightness) simulation.DyeCell(x, y, color);
+                    else simulation.PaintCell(x, y, color);
+                }
+            }
+        }
+
 
         // ---------------------------------------------------------------
         // WIND: middle mouse. Direction = how the mouse moved since the last frame, power = how far it moved.

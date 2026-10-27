@@ -43,6 +43,7 @@ namespace SandBXDSIM
 
         /// increments whenever the grid changes (a fully sleeping world no longer bumps it)
         public int Version => world != null ? world.Version : 0;
+        public int ColorVersion => world != null ? world.ColorVersion : 0;
 
         /// simulation world medium
         public ushort Medium => world != null ? world.Medium : (ushort)0;
@@ -127,6 +128,75 @@ namespace SandBXDSIM
             support.OnCellChanged(x, y, wasAnchored);   // anchored or free? did a neighbour just lose its support?
             world.Version++;
         }
+
+        // ---------------------------------------------------------------
+        // PUBLIC API: cell colors
+        // Visual only: none of these wake cells or touch physics. Atmosphere cells (air, vacuum) are skipped,
+        // and a cell's alpha belongs to its element, so only r / g / b are ever changed.
+        // ---------------------------------------------------------------
+
+        /// <summary>Sets the color exactly. Brightness is NOT kept: a pile painted #FF0000 is flat #FF0000.</summary>
+        public void PaintCell(int x, int y, Color32 color)
+        {
+            if (!TryGetColorable(x, y, out int idx)) return;
+            SetColor(idx, color.r, color.g, color.b);
+        }
+
+        /// <summary>Takes hue and saturation from `dye`, keeps the cell's own brightness (HSV value), so grain survives.</summary>
+        public void DyeCell(int x, int y, Color32 dye)
+        {
+            if (!TryGetColorable(x, y, out int idx)) return;
+
+            Color.RGBToHSV(dye, out float h, out float s, out _);
+            Color.RGBToHSV(world.Cells[idx].color, out _, out _, out float v);
+
+            Color32 c = Color.HSVToRGB(h, s, v);
+            SetColor(idx, c.r, c.g, c.b);
+        }
+
+        /// <summary>Subtracts `amount` from r, g and b, clamped at 0. 255 = black. Negative values lighten.</summary>
+        public void DarkenCell(int x, int y, int amount)
+        {
+            if (!TryGetColorable(x, y, out int idx)) return;
+
+            Color32 c = world.Cells[idx].color;
+            SetColor(idx, Clamp255(c.r - amount), Clamp255(c.g - amount), Clamp255(c.b - amount));
+        }
+
+        /// <summary>
+        /// Back to a normal color for the element (a fresh random shade, the original is gone). A cell that already shows
+        /// one of its element's shades is left alone, otherwise holding the clean button would re-roll it every frame.
+        /// </summary>
+        public void CleanCell(int x, int y)
+        {
+            if (!TryGetColorable(x, y, out int idx)) return;
+
+            ref Cell c = ref world.Cells[idx];
+            if (ElementDatabase.IsNaturalColor(c.element, c.color)) return;
+
+            Color32 fresh = ElementDatabase.RollColor(c.element, world.Rand());
+            SetColor(idx, fresh.r, fresh.g, fresh.b);
+        }
+
+        bool TryGetColorable(int x, int y, out int idx)
+        {
+            idx = 0;
+            if (!world.InBounds(x, y)) return false;
+
+            idx = world.Index(x, y);
+            return world.Behaviors[world.Cells[idx].element] != ElementBehavior.Atmosphere;
+        }
+
+        void SetColor(int idx, byte r, byte g, byte b)
+        {
+            ref Color32 col = ref world.Cells[idx].color;
+            if (col.r == r && col.g == g && col.b == b) return; // nothing to redraw
+
+            col.r = r; col.g = g; col.b = b;
+            world.ColorVersion++;
+        }
+
+        static byte Clamp255(int v) => (byte)(v < 0 ? 0 : (v > 255 ? 255 : v));
 
         /// <summary>True if the cell holds an Atmosphere-type element (Air, Vacuum, ...), i.e. it counts as empty space.</summary>
         public bool IsAtmosphere(int x, int y) =>
