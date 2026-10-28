@@ -26,6 +26,7 @@ namespace SandBXDSIM
         /// does this cell act as an world anchor for other connected cells
         /// </summary>
         public bool anchored;
+        public int blockId; // 0 = none
         public bool awake;
     }
 }

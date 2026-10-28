@@ -165,7 +165,7 @@ namespace SandBXDSIM
         public float EntryCostAt(int from, int target)
         {
             ref readonly Cell t = ref Cells[target];
-            if (t.anchored) return -1f;
+            if (t.anchored || t.blockId != 0) return -1f;
 
             ushort mover = Cells[from].element;
             if (ElementDatabase.Get(t.element).density >= ElementDatabase.Get(mover).density) return -1f;

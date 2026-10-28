@@ -126,7 +126,7 @@ namespace SandBXDSIM
                     if (!world.InBounds(nx, ny)) continue;
 
                     ref Cell n = ref cells[world.Index(nx, ny)];
-                    if (n.freeFalling || n.anchored) continue;
+                    if (n.freeFalling || n.anchored || n.blockId != 0) continue;
 
                     ElementBehavior b = world.Behaviors[n.element];
                     if (b != ElementBehavior.Powder && b != ElementBehavior.Ash) continue;

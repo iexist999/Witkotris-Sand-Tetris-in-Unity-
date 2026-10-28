@@ -123,7 +123,7 @@ namespace SandBXDSIM
 
                         int ni = ny * width + nx;
                         ref Cell n = ref cells[ni];
-                        if (n.anchored || behaviors[n.element] != ElementBehavior.Solid) continue;
+                        if (n.anchored || n.blockId != 0 || behaviors[n.element] != ElementBehavior.Solid) continue;
 
                         n.anchored = true; // doubles as the "visited" mark
                         n.awake = false;

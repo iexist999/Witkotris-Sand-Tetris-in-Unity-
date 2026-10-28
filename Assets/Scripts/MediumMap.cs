@@ -67,7 +67,7 @@ namespace SandBXDSIM
                     ElementBehavior b = behaviors[cells[row + x].element];
                     byte k;
 
-                    if (b == ElementBehavior.Solid || b == ElementBehavior.SuperSolid) { k = Wall; inLiquid[x] = 0; }
+                    if (cells[row + x].blockId != 0 || b == ElementBehavior.Solid || b == ElementBehavior.SuperSolid) { k = Wall; inLiquid[x] = 0; }
                     else if (b == ElementBehavior.Liquid) { k = Water; inLiquid[x] = 1; }
                     else if (b == ElementBehavior.Atmosphere || b == ElementBehavior.Gas) { k = Air; inLiquid[x] = 0; }
                     else k = inLiquid[x] != 0 ? Water : Air; // powder / ash / anything else: lives in the medium above it

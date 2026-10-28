@@ -50,6 +50,8 @@ namespace SandBXDSIM
 
         /// sizes of every level + coordinate conversions
         public WorldLayout Layout => world?.Layout;
+        internal World World => world;
+        internal WakeSystem Waker => waker;
 
         // ---- the parts (created in Awake) ----
         World world;

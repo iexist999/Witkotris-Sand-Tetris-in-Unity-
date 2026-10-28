@@ -177,7 +177,7 @@ namespace SandBXDSIM
         bool IsStackStone(int x, int y)
         {
             ref Cell c = ref cells[world.Index(x, y)];
-            return !c.anchored && c.velocity.x == 0f && Mathf.RoundToInt(c.velocity.y) == 0 &&
+            return !c.anchored && c.blockId == 0 && c.velocity.x == 0f && Mathf.RoundToInt(c.velocity.y) == 0 &&
                    world.Behaviors[c.element] == ElementBehavior.Solid;
         }
 

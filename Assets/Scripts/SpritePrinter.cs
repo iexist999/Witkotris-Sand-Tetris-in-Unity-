@@ -44,15 +44,15 @@ public class SpritePrinter : MonoBehaviour
     // ---------------------------------------------------------------
 
     /// <summary>Prints a sprite. Its own pivot decides which pixel sits on the print position. Returns how many cells were placed.</summary>
-    public int PrintSpriteWorld(Sprite sprite, PrintSettings printSettings) {
+    public int PrintSpriteWorld(Sprite sprite, PrintSettings printSettings, List<Vector2Int> placedCells = null) {
         if (sprite == null) { Debug.LogWarning("WARNING: sprite is null. cancelling operation."); return 0; }
         if (!TryReadSprite(sprite, out Color32[] pixels, out int w, out int h, out Vector2 pivot)) return 0;
 
-        return Print(pixels, w, h, pivot, printSettings);
+        return Print(pixels, w, h, pivot, printSettings, placedCells);
     }
 
     /// <summary>Prints a whole texture. The pivot is its centre. Returns how many cells were placed.</summary>
-    public int PrintSpriteWorld(Texture2D texture, PrintSettings printSettings) {
+    public int PrintSpriteWorld(Texture2D texture, PrintSettings printSettings, List<Vector2Int> placedCells = null) {
         if (texture == null) { Debug.LogWarning("WARNING: texture is null. cancelling operation."); return 0; }
 
         Color32[] pixels;
@@ -62,7 +62,13 @@ public class SpritePrinter : MonoBehaviour
             return 0;
         }
 
-        return Print(pixels, texture.width, texture.height, new Vector2(texture.width * 0.5f, texture.height * 0.5f), printSettings);
+        return Print(pixels, texture.width, texture.height, new Vector2(texture.width * 0.5f, texture.height * 0.5f), printSettings, placedCells);
+    }
+
+    public SandBlock PrintSpriteBlock(Sprite sprite, PrintSettings printSettings, string[] allowedMediums = null) {
+        var placed = new List<Vector2Int>();
+        if (PrintSpriteWorld(sprite, printSettings, placed) == 0) return null;
+        return new SandBlock(placed, allowedMediums);
     }
 
     // ---------------------------------------------------------------
@@ -93,7 +99,7 @@ public class SpritePrinter : MonoBehaviour
     // ---------------------------------------------------------------
     // PRINTING
     // ---------------------------------------------------------------
-    int Print(Color32[] pixels, int w, int h, Vector2 pivot, PrintSettings s) {
+    int Print(Color32[] pixels, int w, int h, Vector2 pivot, PrintSettings s, List<Vector2Int> placedCells) {
         // ---- validation ----
         if (s == null) { Debug.LogWarning("WARNING: printSettings is null. cancelling operation."); return 0; }
 
@@ -158,6 +164,7 @@ public class SpritePrinter : MonoBehaviour
                 sim.SetCell(cx, cy, id);
                 ApplyColor(sim, cx, cy, id, pixel, s);
                 placed++;
+                placedCells?.Add(new Vector2Int(cx, cy));
             }
         }
         return placed;
