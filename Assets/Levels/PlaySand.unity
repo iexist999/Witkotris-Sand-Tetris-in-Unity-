@@ -321,7 +321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d12a658aaf8ccd4d8a418a52b61f183, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testSprite: {fileID: 0}
+  testSprite: {fileID: 21300000, guid: 4b937a80b635a2944b66864155fa0fcd, type: 3}
   testElement: sand
   testPosition: {x: 100, y: 100}
   testRotation: 0
