@@ -1,0 +1,16 @@
+{
+    "name": "GAMECORE",
+    "rootNamespace": "pSB.GAMECORE",
+    "references": [
+        "GUID:f9b416ad191eaae46a4e5b01e63f8260"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
