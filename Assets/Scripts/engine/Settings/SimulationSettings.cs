@@ -132,8 +132,7 @@ public class SimulationSettings
     public static float WindWakeSpeed = 0.2f; // wind stronger than this keeps dust awake
     public static bool SimulateDrag = true;
 
-    public static readonly FlowSettings AirFlow = new FlowSettings
-    {
+    public static readonly FlowSettings AirFlow = new FlowSettings {
         element = null,          // default medium
         decay = 0.995f,
         maxSpeed = 8f,
@@ -142,8 +141,7 @@ public class SimulationSettings
         openBoundaries = true,
     };
 
-    public static readonly FlowSettings WaterFlow = new FlowSettings
-    {
+    public static readonly FlowSettings WaterFlow = new FlowSettings {
         element = "water",       // its vorticity property drives this field
         decay = 0.98f,
         maxSpeed = 3f,
