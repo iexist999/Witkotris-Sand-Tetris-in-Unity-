@@ -273,6 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simulation: {fileID: 322835530}
   view: {fileID: 322835532}
+  cam: {fileID: 0}
   zones:
     render: 0
     awakeColor: {r: 1, g: 1, b: 1, a: 1}
@@ -285,14 +286,21 @@ MonoBehaviour:
     render: 1
     awakeColor: {r: 0, g: 1, b: 0.2456789, a: 0.9}
     sleepingColor: {r: 1, g: 0, b: 0, a: 0.35}
-  drawAirflow: 1
+  drawAirflow: 0
   arrowSpacing: 4
   arrowScale: 3
   minSpeed: 0.02
   colorMaxSpeed: 2
   slowColor: {r: 0.4, g: 0.8, b: 1, a: 0.85}
   fastColor: {r: 1, g: 0.3, b: 0.2, a: 1}
---- !u!1 &334070976
+  drawMouseInfo: 1
+  crosshairSize: 2
+  crosshairColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverCellColor: {r: 1, g: 0.9, b: 0.2, a: 1}
+  labelColor: {r: 1, g: 1, b: 1, a: 1}
+  labelBackground: {r: 0, g: 0, b: 0, a: 0.65}
+  labelFontSize: 24
+--- !u!1 &513425751
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -300,46 +308,71 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 334070978}
-  - component: {fileID: 334070977}
+  - component: {fileID: 513425752}
+  - component: {fileID: 513425753}
   m_Layer: 0
-  m_Name: SpritePrinter
+  m_Name: GameDatabase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &334070977
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 334070976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d12a658aaf8ccd4d8a418a52b61f183, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  testSprite: {fileID: 21300000, guid: 4b937a80b635a2944b66864155fa0fcd, type: 3}
-  testElement: sand
-  testPosition: {x: 100, y: 100}
-  testRotation: 0
---- !u!4 &334070978
+--- !u!4 &513425752
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 334070976}
+  m_GameObject: {fileID: 513425751}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.979464, y: 6.594981, z: -0.018922692}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2114984509}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &513425753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 513425751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75a562ffbc9640940a6d2ab682481de2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameProfiles:
+  - profileName: ClassicSandDIF1
+    gamemode: 1
+    difficultyLevel: 1
+    gameSettings:
+      gameColors:
+      - serializedVersion: 2
+        rgba: 4280822015
+      - serializedVersion: 2
+        rgba: 4279019008
+      - serializedVersion: 2
+        rgba: 4283236275
+      - serializedVersion: 2
+        rgba: 4294934337
+      gameShapes:
+      - {fileID: 21300000, guid: 69df5f7dfe507004589f0014729f6c98, type: 3}
+      - {fileID: 21300000, guid: a6c91e229fb09d042be332bdd1befe3e, type: 3}
+      - {fileID: 21300000, guid: f7e446a77b770a24e9f39833129cf2a8, type: 3}
+      - {fileID: 21300000, guid: f15d4cfa839afac4f8027b1ba2aad2be, type: 3}
+      - {fileID: 21300000, guid: b09520e35e4770449b0fae1a68c8d82e, type: 3}
+      - {fileID: 21300000, guid: 9515387094250474cad3141f339c81ce, type: 3}
+      - {fileID: 21300000, guid: f11f836f1b5bc0e439f34db9ae33f9bd, type: 3}
+      initialGameSpeed: 60
+      initialGameSpeedMultiplier: 1
+      initialBlockMoveSpeed: 10
+      gameSpeedFactor: 0.005
+      onlyCheckDownwardsMovement: 0
+      useModifiers: 0
+      activeModifiers: []
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,6 +659,54 @@ Transform:
   - {fileID: 656367396}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1815176941
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1815176943}
+  - component: {fileID: 1815176942}
+  m_Layer: 0
+  m_Name: Systems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1815176942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815176941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d12a658aaf8ccd4d8a418a52b61f183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testSprite: {fileID: 0}
+  testElement: sand
+  testPosition: {x: 100, y: 100}
+  testRotation: 0
+--- !u!4 &1815176943
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1815176941}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2114984509}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2049313302
 GameObject:
   m_ObjectHideFlags: 0
@@ -774,6 +855,85 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &2114984508
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2114984509}
+  - component: {fileID: 2114984511}
+  - component: {fileID: 2114984510}
+  - component: {fileID: 2114984512}
+  m_Layer: 0
+  m_Name: Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2114984509
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114984508}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.979464, y: 6.594981, z: -0.018922692}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 513425752}
+  - {fileID: 1815176943}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2114984510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114984508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd632d1f789b806409254999857a44ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  activeGamemode: 1
+  activeDifficulty: 1
+--- !u!114 &2114984511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114984508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac3c4c16c7f15814f89bf0e8818c6e6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockMoveDelay: 3
+  gameSettingsManager: {fileID: 2114984510}
+  spritePrinter: {fileID: 1815176942}
+  gameInput: {fileID: 2114984512}
+--- !u!114 &2114984512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114984508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6097656d2f210384d9620e3a5381b65f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sandGame: {fileID: 2114984511}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -781,4 +941,4 @@ SceneRoots:
   - {fileID: 519420032}
   - {fileID: 668889978}
   - {fileID: 322835529}
-  - {fileID: 334070978}
+  - {fileID: 2114984509}

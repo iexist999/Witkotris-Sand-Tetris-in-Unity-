@@ -73,6 +73,11 @@ namespace SandBXDSIM
             }
         }
 
+        /// <summary>Results of <see cref="TryMove(int, int)"/>.</summary>
+        public const int MoveSuccess = 0;
+        public const int MoveBlocked = 1;     // a target cell is occupied (anchored, another block, or a non-allowed element)
+        public const int MoveOutOfBounds = 2; // a target position is outside the world
+
         // ---------------------------------------------------------------
         // STATE
         // ---------------------------------------------------------------
@@ -164,38 +169,42 @@ namespace SandBXDSIM
         // ---------------------------------------------------------------
 
         /// <summary>
-        /// Moves the whole block by (dx, dy) cells. Returns true if it moved (a zero move counts as success).
-        /// Returns false, and changes nothing, if any cell it would enter is outside the world, anchored, part of
-        /// another block, or an element that is neither the world's medium nor in <see cref="allowedMediums"/>.
+        /// Moves the whole block by (dx, dy) cells. Returns:
+        ///   0 (<see cref="MoveSuccess"/>)     the block moved (a zero move counts as success)
+        ///   1 (<see cref="MoveBlocked"/>)     nothing changed: a cell it would enter is anchored, part of another block,
+        ///                                     or an element that is neither the world's medium nor in <see cref="allowedMediums"/>
+        ///   2 (<see cref="MoveOutOfBounds"/>) nothing changed: a cell it would enter is outside the world
         /// See <see cref="checkPath"/> for what counts as "enter".
         /// </summary>
-        public bool TryMove(int dx, int dy) {
-            if (destroyed) return false;
+        public int TryMove(int dx, int dy) {
+            if (destroyed) return MoveBlocked;
 
             Prune();
-            if (count == 0) return false;
-            if (dx == 0 && dy == 0) return true;
+            if (count == 0) return MoveBlocked;
+            if (dx == 0 && dy == 0) return MoveSuccess;
 
             BuildPassable();
-            if (!PathIsClear(dx, dy)) return false;
+
+            int result = CheckPath(dx, dy);
+            if (result != MoveSuccess) return result;
 
             Commit(dx, dy);
-            return true;
+            return MoveSuccess;
         }
 
-        public bool TryMove(Vector2Int delta) => TryMove(delta.x, delta.y);
+        public int TryMove(Vector2Int delta) => TryMove(delta.x, delta.y);
 
         /// <summary>Can the block, as it is now, occupy (tx, ty)? Its own cells count as free: they move along.</summary>
-        bool CanOccupy(int tx, int ty) {
-            if (!world.InBounds(tx, ty)) return false;
+        int CanOccupy(int tx, int ty) {
+            if (!world.InBounds(tx, ty)) return MoveOutOfBounds;
 
             ref readonly Cell c = ref cells[world.Index(tx, ty)];
-            if (c.blockId == id) return true;
-            if (c.blockId != 0 || c.anchored) return false;
-            return passable[c.element];
+            if (c.blockId == id) return MoveSuccess;
+            if (c.blockId != 0 || c.anchored) return MoveBlocked;
+            return passable[c.element] ? MoveSuccess : MoveBlocked;
         }
 
-        bool PathIsClear(int dx, int dy) {
+        int CheckPath(int dx, int dy) {
             int ax = Mathf.Abs(dx), ay = Mathf.Abs(dy);
             int sx = dx < 0 ? -1 : 1, sy = dy < 0 ? -1 : 1;
             int steps = ax + ay;
@@ -205,10 +214,15 @@ namespace SandBXDSIM
                 int ox = sx * Mathf.Min(k, ax);
                 int oy = sy * Mathf.Max(0, k - ax);
 
-                for (int i = 0; i < count; i++)
-                    if (!CanOccupy(xs[i] + ox, ys[i] + oy)) return false;
+                bool blocked = false;
+                for (int i = 0; i < count; i++) {
+                    int r = CanOccupy(xs[i] + ox, ys[i] + oy);
+                    if (r == MoveOutOfBounds) return MoveOutOfBounds; // out of bounds wins within a step, so the result doesn't depend on cell order
+                    if (r == MoveBlocked) blocked = true;
+                }
+                if (blocked) return MoveBlocked;
             }
-            return true;
+            return MoveSuccess;
         }
 
         void BuildPassable() {
